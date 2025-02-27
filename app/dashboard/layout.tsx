@@ -1,7 +1,8 @@
 
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import type React from "react"
-import "../styles/globals.css"
 import { Inter } from "next/font/google"
+import DashboardLayout from "@/components/layout/dashboard/dashboard-layout"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -17,15 +18,9 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <div className="">
-          <div className="">
-              <body className={inter.className}>
-                {children}
-              </body>
-          </div>
-      </div>
-    </html>
+    <DashboardLayout>
+        {children}
+    </DashboardLayout>
   )
 }
 

@@ -1,26 +1,19 @@
-import DashboardLayout from "@/components/layout/dashboard-layout"
+import { AppSidebar } from "@/components/layout/dashboard/app-sidebar";
+import { SiteHeader } from "@/components/layout/dashboard/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function Dashboard() {
+export default function Page() {
   return (
-    <DashboardLayout>
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Welcome back, User!</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-100 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Quiz Progress</h3>
-            <p className="text-3xl font-bold">75%</p>
-          </div>
-          <div className="bg-green-100 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Average Score</h3>
-            <p className="text-3xl font-bold">82%</p>
-          </div>
-          <div className="bg-yellow-100 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Flashcards Mastered</h3>
-            <p className="text-3xl font-bold">124</p>
-          </div>
-        </div>
-      </div>
-    </DashboardLayout>
-  )
-}
+    <div>
 
+    <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+        <div className="aspect-video rounded-xl bg-muted/50" />
+        <div className="aspect-video rounded-xl bg-muted/50" />
+        <div className="aspect-video rounded-xl bg-muted/50" />
+      </div>
+      <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+    </div>
+    </div>
+  );
+}
