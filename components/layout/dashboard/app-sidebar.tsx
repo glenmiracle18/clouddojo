@@ -41,7 +41,7 @@ const data = {
   navMain: [
     {
       title: "Home",
-      url: "#",
+      url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
       // items: [
@@ -61,7 +61,7 @@ const data = {
     },
     {
       title: "Practice Tests",
-      url: "/dashbaord/practice",
+      url: "/dashboard/practice",
       icon: Bot,
       // items: [
       //   {
@@ -80,7 +80,7 @@ const data = {
     },
     {
       title: "Flashcards",
-      url: "#",
+      url: "/dashboard/flashcards",
       icon: BookOpen,
       // items: [
       //   {
@@ -103,7 +103,7 @@ const data = {
     },
     {
       title: "Leaderboard",
-      url: "#",
+      url: "/dashboard/leaderboard",
       icon: Settings2,
       // items: [
       //   {
