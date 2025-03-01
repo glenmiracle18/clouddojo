@@ -1,23 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
+import { useEffect } from "react";
 import {
   BookOpen,
   Bot,
   Command,
   Frame,
   LifeBuoy,
+  LoaderIcon,
   Map,
   PieChart,
   Send,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +28,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { auth } from "@clerk/nextjs/server";
+import { DarkModeToggle } from "@/components/dark-mode-toggle";
 
 const data = {
   user: {
@@ -121,7 +125,7 @@ const data = {
       // ],
     },
   ],
- 
+
   projects: [
     // {
     //   name: "Design Engineering",
@@ -139,7 +143,9 @@ const data = {
     //   icon: Map,
     // },
   ],
-}
+};
+
+// const user = auth()
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -168,9 +174,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
         {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      {/* <div className="p-4 flex">
+        <DarkModeToggle />
+      </div> */}
+      {data && (
+        <SidebarFooter>
+          <NavUser user={data.user} />
+        </SidebarFooter>
+      )}
     </Sidebar>
-  )
+  );
 }

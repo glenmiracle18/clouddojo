@@ -7,9 +7,8 @@ import DashboardLayout from "@/components/layout/dashboard/dashboard-layout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "AWS Certification Prep",
+  title: "Clouddojo",
   description: "Prepare for your AWS certification exams with interactive practice questions",
-    generator: 'v0.dev'
 }
 
 export default function Layout({

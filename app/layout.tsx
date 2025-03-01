@@ -2,13 +2,20 @@
 import type React from "react"
 import "../styles/globals.css"
 import { Inter } from "next/font/google"
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs'
+import Header from "@/components/header";
 
 const inter = Inter({ subsets: ["latin"] })
-
 export const metadata = {
   title: "AWS Certification Prep",
   description: "Prepare for your AWS certification exams with interactive practice questions",
-    generator: 'v0.dev'
 }
 
 export default function Layout({
@@ -17,6 +24,7 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <div className="">
           <div className="">
@@ -26,6 +34,8 @@ export default function Layout({
           </div>
       </div>
     </html>
+    </ClerkProvider>
+
   )
 }
 

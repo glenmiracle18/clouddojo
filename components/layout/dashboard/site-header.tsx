@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import { DarkModeToggle } from "@/components/dark-mode-toggle"
+import { UserButton } from "@clerk/nextjs"
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar()
@@ -45,7 +46,7 @@ export function SiteHeader() {
           </BreadcrumbList>
         </Breadcrumb>
         <SearchForm className="w-full sm:ml-auto sm:w-auto" />
-        <DarkModeToggle />
+        <UserButton />
       </div>
     </header>
   )
