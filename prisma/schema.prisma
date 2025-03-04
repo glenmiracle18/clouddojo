@@ -1,0 +1,97 @@
+// Prisma schema for the AWS Certification Study Web App
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User model
+model User {
+  userId    String         @id @default(uuid())
+  email     String         @unique
+  firstName String         @unique
+  lastName  String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  progress  UserProgress[]
+  purchases Purchase[]
+}
+
+// Quiz model
+model Quiz {
+  id           String         @id @default(uuid())
+  title        String
+  description  String?
+  questions    Question[]
+  isPublic     Boolean        @default(false)
+  price        Float?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  purchases    Purchase[]
+  userProgress UserProgress[]
+  categoryId   String?
+  category     Category?      @relation(fields: [categoryId], references: [id])
+}
+
+// Question model
+model Question {
+  id            String   @id @default(uuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text          String
+  options       String[]
+  isMultiSelect Boolean @default(false)
+  correctAnswer String[]
+  explanation   String?
+  createdAt     DateTime @default(now())
+}
+
+// Flashcard model
+model Flashcard {
+  id         String    @id @default(uuid())
+  topic      String
+  question   String
+  answer     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+}
+
+// UserProgress model
+model UserProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score       Int
+  completedAt DateTime?
+  timeTaken   Int?
+  attempts    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Purchase model
+model Purchase {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  purchasedAt DateTime @default(now())
+  price       Float
+}
+
+// Category model (optional)
+model Category {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  quizzes    Quiz[]
+  flashcards Flashcard[]
+  // questions     Question[]
+}
