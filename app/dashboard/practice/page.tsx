@@ -1,238 +1,343 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useMemo } from "react"
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  Clock,
+  FileQuestion,
+  Check,
+  SlidersHorizontal,
+  LayoutGrid,
+  List,
+} from "lucide-react"
+
+import { practiceTests, categories, levels, type PracticeTest } from "@/public/data/test-data"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import Confetti from "react-confetti"
-import { useWindowSize } from "react-use"
-import { Bar } from "react-chartjs-2"
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Separator } from "@/components/ui/separator"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import FilterComponent from "@/components/dashboard/filter-component"
+import SearchBar from "@/components/dashboard/search-bar"
+import Link from "next/link"
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+export default function PracticeTestsPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedLevel, setSelectedLevel] = useState("all")
+  const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all")
+  const [sortBy, setSortBy] = useState<"popularity" | "questions" | "newest">("popularity")
+  const [view, setView] = useState<"grid" | "list">("grid")
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-const questions = [
-  {
-    id: 1,
-    question: "What is Amazon EC2?",
-    options: ["Elastic Compute Cloud", "Elastic Container Cloud", "Elastic Computer Cloud", "Elastic Cloud Compute"],
-    correctAnswer: 0,
-  },
-  {
-    id: 2,
-    question: "Which AWS service is used for object storage?",
-    options: ["Amazon EBS", "Amazon S3", "Amazon EFS", "Amazon Glacier"],
-    correctAnswer: 1,
-  },
-  {
-    id: 3,
-    question: "What is the purpose of Amazon VPC?",
-    options: [
-      "Virtual Private Cloud for networking",
-      "Virtual Payment Center for billing",
-      "Visual Processing Center for image analysis",
-      "Vertical Platform Computing for scaling",
-    ],
-    correctAnswer: 0,
-  },
-  {
-    id: 4,
-    question: "Which AWS service is used for managed relational databases?",
-    options: ["DynamoDB", "Redshift", "RDS", "ElastiCache"],
-    correctAnswer: 2,
-  },
-  {
-    id: 5,
-    question: "What is AWS Lambda used for?",
-    options: ["Load balancing", "Serverless computing", "Content delivery", "Virtual machine management"],
-    correctAnswer: 1,
-  },
-]
-
-export default function QuizPage() {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [score, setScore] = useState(0)
-  const [quizEnded, setQuizEnded] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(30)
-  const { width, height } = useWindowSize()
-  const [answers, setAnswers] = useState<string[]>(Array(questions.length).fill(''))
-
-  useEffect(() => {
-    if (!quizEnded) {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime === 0) {
-            handleNextQuestion()
-            return 30
-          }
-          return prevTime - 1
-        })
-      }, 1000)
-      return () => clearInterval(timer)
-    }
-  }, [quizEnded])
-
-  const handleAnswerSelect = (questionIndex: number, answer: string) => {
-    const newAnswers = [...answers];
-    newAnswers[questionIndex] = answer;
-    setAnswers(newAnswers);
-  };
-
-  const handlePreviousQuestion = () => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = selectedAnswer?.toString() || '';
-    setAnswers(newAnswers);
-    
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
-      const previousAnswer = answers[currentQuestion - 1]
-      setSelectedAnswer(Number.parseInt(previousAnswer))
-      setTimeLeft(30)
-    } else {
-      setQuizEnded(true)
-    }
-  }
-
-  const handleNextQuestion = () => {
-    // Save the current answer before moving to the next question
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = selectedAnswer?.toString() || '';
-    setAnswers(newAnswers);
-
-    if (selectedAnswer === questions[currentQuestion].correctAnswer) {
-      setScore(score + 1)
-    }
-
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-      const nextAnswer = answers[currentQuestion + 1]
-      setSelectedAnswer(Number.parseInt(nextAnswer))
-    } else {
-      setQuizEnded(true)
-    }
-  }
-
-  const handleRestartQuiz = () => {
-    setCurrentQuestion(0)
-    setSelectedAnswer(null)
-    setScore(0)
-    setQuizEnded(false)
-    setTimeLeft(30)
-  }
-
-  const chartData = {
-    labels: ["Correct", "Incorrect"],
-    datasets: [
-      {
-        label: "Quiz Results",
-        data: [score, questions.length - score],
-        backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(255, 99, 132, 0.6)"],
-        borderColor: ["rgb(75, 192, 192)", "rgb(255, 99, 132)"],
-        borderWidth: 1,
-      },
-    ],
-  }
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: "Quiz Performance",
-      },
-    },
-  }
-
-  if (quizEnded) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <Confetti width={width} height={height} />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white p-8 rounded-lg shadow-lg text-center max-w-2xl w-full"
-        >
-          <h2 className="text-4xl font-bold mb-6 text-purple-600">Quiz Completed!</h2>
-          <p className="text-2xl mb-4 text-gray-700">
-            Your score: {score} out of {questions.length}
-          </p>
-          <p className="text-xl mb-6 text-gray-600">Performance: {((score / questions.length) * 100).toFixed(2)}%</p>
-          <div className="mb-8">
-            <Bar data={chartData} options={chartOptions} />
-          </div>
-          <Button onClick={handleRestartQuiz} size="lg" className="bg-purple-500 hover:bg-purple-600 text-white">
-            Restart Quiz
-          </Button>
-        </motion.div>
-      </div>
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
     )
   }
 
-  const question = questions[currentQuestion]
+  const handleLevelChange = (value: string) => {
+    setSelectedLevel(value)
+  }
+
+  const handlePriceFilterChange = (value: "all" | "free" | "paid") => {
+    setPriceFilter(value)
+  }
+
+  const clearFilters = () => {
+    setSelectedCategories([])
+    setSelectedLevel("all")
+    setPriceFilter("all")
+  }
+
+  const applyFilters = () => {
+    setIsFilterOpen(false)
+  }
+
+  const filteredTests = useMemo(() => {
+    return practiceTests
+      .filter((test) => {
+        // Search filter
+        if (
+          searchQuery &&
+          !test.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !test.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !test.category.toLowerCase().includes(searchQuery.toLowerCase())
+        ) {
+          return false
+        }
+
+        // Category filter
+        if (selectedCategories.length > 0 && !selectedCategories.includes(test.category.toLowerCase())) {
+          return false
+        }
+
+        // Level filter
+        if (selectedLevel !== "all" && test.level !== selectedLevel) {
+          return false
+        }
+
+        // Price filter
+        if (priceFilter === "free" && test.price !== null) {
+          return false
+        }
+        if (priceFilter === "paid" && test.price === null) {
+          return false
+        }
+
+        return true
+      })
+      .sort((a, b) => {
+        if (sortBy === "popularity") {
+          return b.popularity - a.popularity
+        } else if (sortBy === "questions") {
+          return b.questions - a.questions
+        } else {
+          // For "newest", we'll just use the id as a proxy since we don't have dates
+          return a.id.localeCompare(b.id)
+        }
+      })
+  }, [searchQuery, selectedCategories, selectedLevel, priceFilter, sortBy])
+
+  const activeFilterCount =
+    selectedCategories.length + (selectedLevel !== "all" ? 1 : 0) + (priceFilter !== "all" ? 1 : 0)
 
   return (
-    <div className="min-h-screen flex flex-col items-center  p-4">
-      <div className="w-full bg-white p-8">
-        <div className="mb-6">
-          <Progress value={((currentQuestion + 1) / questions.length) * 100} className="mb-2" />
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>
-              Question {currentQuestion + 1} of {questions.length}
-            </span>
-            <span>Time left: {timeLeft}s</span>
+    <div className="flex min-h-screen bg-background">
+
+      <div className="flex-1 md:ml-72">
+        <div className="p-4 md:p-6 pt-16 md:pt-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold">Practice Tests</h1>
+                <ToggleGroup
+                  type="single"
+                  value={view}
+                  onValueChange={(value) => value && setView(value as "grid" | "list")}
+                >
+                  <ToggleGroupItem value="grid" aria-label="Grid view">
+                    <LayoutGrid className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4">
+                <SearchBar />
+
+                <FilterComponent />
+              </div>
+
+              {activeFilterCount > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedCategories.map((categoryId) => {
+                    const category = categories.find((c) => c.id === categoryId)
+                    return (
+                      <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
+                        {category?.label}
+                        <button
+                          onClick={() => handleCategoryChange(categoryId)}
+                          className="ml-1 rounded-full hover:bg-muted p-0.5"
+                        >
+                          <Check className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )
+                  })}
+
+                  {selectedLevel !== "all" && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      {levels.find((l) => l.id === selectedLevel)?.label}
+                      <button
+                        onClick={() => setSelectedLevel("all")}
+                        className="ml-1 rounded-full hover:bg-muted p-0.5"
+                      >
+                        <Check className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  )}
+
+                  {priceFilter !== "all" && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      {priceFilter === "free" ? "Free" : "Paid"}
+                      <button onClick={() => setPriceFilter("all")} className="ml-1 rounded-full hover:bg-muted p-0.5">
+                        <Check className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-2">
+              <h2 className="text-lg font-medium mb-4">
+                {filteredTests.length} {filteredTests.length === 1 ? "Test" : "Tests"} Available
+              </h2>
+
+              {view === "grid" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredTests.map((test) => (
+                    <TestCard key={test.id} test={test} view="grid" />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {filteredTests.map((test) => (
+                    <TestCard key={test.id} test={test} view="list" />
+                  ))}
+                </div>
+              )}
+
+              {filteredTests.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <FileQuestion className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">No tests found</h3>
+                  <p className="text-muted-foreground mt-1">Try adjusting your filters or search query</p>
+                  <Button variant="outline" className="mt-4" onClick={clearFilters}>
+                    Clear All Filters
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestion}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-2xl font-semibold mb-4 text-purple-600">{question.question}</h2>
-            <RadioGroup
-              value={selectedAnswer?.toString()}
-              onValueChange={(value) => setSelectedAnswer(Number.parseInt(value))}
-            >
-              {question.options.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-4">
-                  <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                  <Label htmlFor={`option-${index}`} className="text-lg text-gray-700">
-                    {option}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </motion.div>
-        </AnimatePresence>
-        <div className="mt-6 flex justify-between items-center">
-          
-          <Button
-            onClick={handlePreviousQuestion}
-            disabled={currentQuestion === 0}
-            className="bg-green-400 hover:bg-green-500 text-gray-800"
-          >
-            {currentQuestion < questions.length - 1 ? "Prev" : "Finish Quiz"}
-          </Button>
-          <Button
-            onClick={handleNextQuestion}
-            disabled={selectedAnswer === null}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-800"
-          >
-            {currentQuestion < questions.length - 1 ? "Next" : "Finish Quiz"}
-          </Button>
-        </div>
-        <div className="my-8 text-xl font-semibold text-purple-600">Score: {score}</div>
       </div>
     </div>
   )
+}
+
+interface TestCardProps {
+  test: PracticeTest
+  view: "grid" | "list"
+}
+
+function TestCard({ test, view }: TestCardProps) {
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case "beginner":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+      case "intermediate":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+      case "advanced":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
+      case "expert":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+    }
+  }
+
+  if (view === "grid") {
+    return (
+      <Card className="overflow-hidden transition-all hover:shadow-md">
+        <div className="aspect-video relative overflow-hidden">
+          <img
+            src={test.image || "/aws-bg-image.jpg"}
+            alt={test.title}
+            className="object-cover w-full h-full transition-transform hover:scale-105"
+          />
+          {test.price === null && (
+            <Badge className="absolute top-2 right-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-500">Free</Badge>
+          )}
+        </div>
+        <CardHeader className="p-4 pb-0">
+          <div className="flex justify-between items-start">
+            <div>
+              <Badge variant="outline" className={`mb-2 ${getLevelColor(test.level)}`}>
+                {test.level.charAt(0).toUpperCase() + test.level.slice(1)}
+              </Badge>
+              <h3 className="font-semibold text-lg line-clamp-1">{test.title}</h3>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
+          <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{test.description}</p>
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <FileQuestion className="h-4 w-4 text-muted-foreground" />
+              <span>{test.questions} questions</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>{test.duration} min</span>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="p-4 pt-0 flex justify-between items-center">
+          {test.price !== null ? (
+            <span className="font-medium">${test.price.toFixed(2)}</span>
+          ) : (
+            <span style={{ color: '#4ade80' }}>Free</span>
+          )}
+          <Link href={`/dashboard/practice/1`}>
+          <Button>Start Test</Button>
+          </Link>
+        </CardFooter>
+      </Card>
+    )
+  } else {
+    return (
+      <Card className="overflow-hidden transition-all hover:shadow-md">
+        <div className="flex flex-col md:flex-row">
+          <div className="md:w-1/4 lg:w-1/5 aspect-video md:aspect-square relative overflow-hidden">
+            <img src={test.image || "/placeholder.svg"} alt={test.title} className="object-cover w-full h-full" />
+            {test.price === null && (
+              <Badge className="absolute top-2 right-2 bg-emerald-500 hover:bg-emerald-600">Free</Badge>
+            )}
+          </div>
+          <div className="flex-1 p-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
+              <div>
+                <Badge variant="outline" className={`mb-2 ${getLevelColor(test.level)}`}>
+                  {test.level.charAt(0).toUpperCase() + test.level.slice(1)}
+                </Badge>
+                <h3 className="font-semibold text-lg">{test.title}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {test.price !== null ? (
+                  <span className="font-medium">${test.price.toFixed(2)}</span>
+                ) : (
+                  <span className="font-medium text-emerald-600">Free</span>
+                )}
+                <Button>Start Test</Button>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-sm mb-3">{test.description}</p>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1">
+                <FileQuestion className="h-4 w-4 text-muted-foreground" />
+                <span>{test.questions} questions</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>{test.duration} min</span>
+              </div>
+              <Badge variant="outline" className="bg-background">
+                {test.category}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 }
 

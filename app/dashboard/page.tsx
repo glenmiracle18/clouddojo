@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import SearchBar from "@/search-bar"
-import FilterComponent from "@/filter-component"
-import PerformanceSection from "@/performance-section"
-import { DateRangePicker } from "@/date-range-picker"
-import ViewToggle from "@/view-toggle"
+import SearchBar from "@/components/dashboard/search-bar"
+import FilterComponent from "@/components/dashboard/filter-component"
+import PerformanceSection from "@/components/dashboard/performance-section"
+import { DateRangePicker } from "@/components/dashboard/date-range-picker"
+import ViewToggle from "@/components/dashboard/view-toggle"
 
 export default function DashboardPage() {
   const [view, setView] = useState<"grid" | "list">("grid")
@@ -83,7 +83,7 @@ export default function DashboardPage() {
                 <PerformanceSection />
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <DateRangePicker onDateRangeChange={(range) => console.log("Date range:", range)} />
+                  <DateRangePicker onDateRangeChange={(range) => console.log("Date range:", range)}  />
                   <div className="flex justify-end md:justify-start">
                     <ViewToggle onChange={setView} />
                   </div>
