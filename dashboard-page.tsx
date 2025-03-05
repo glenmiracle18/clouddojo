@@ -2,6 +2,11 @@
 
 import { useState } from "react"
 import { Bell, RefreshCcw } from "lucide-react"
+import FilterComponent from "./filter-component"
+import SearchBar from "./search-bar"
+import { DateRangePicker } from "./date-range-picker"
+import ViewToggle from "./view-toggle"
+import PerformanceSection from "./performance-section"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,11 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import SearchBar from "@/search-bar"
-import FilterComponent from "@/filter-component"
-import PerformanceSection from "@/performance-section"
-import { DateRangePicker } from "@/date-range-picker"
-import ViewToggle from "@/view-toggle"
 
 export default function DashboardPage() {
   const [view, setView] = useState<"grid" | "list">("grid")
@@ -32,7 +32,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto p-4 md:p-6 max-w-full">
+    <div className="p-4 md:p-6">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -129,7 +129,7 @@ export default function DashboardPage() {
             </TabsContent>
 
             <TabsContent value="reports">
-              <div className="h-[100vh] flex items-center justify-center border rounded-lg">
+              <div className="h-[400px] flex items-center justify-center border rounded-lg">
                 Reports content would go here
               </div>
             </TabsContent>
