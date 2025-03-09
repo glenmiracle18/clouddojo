@@ -16,13 +16,15 @@ import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import { DarkModeToggle } from "@/components/dark-mode-toggle"
 import { UserButton } from "@clerk/nextjs"
+import FeedbackDialog from "./feedback-dialog"
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar()
 
   return (
-    <header className="flex sticky top-0 z-50 w-full items-center border-b">
-      <div className="flex h-[--header-height] w-full items-center gap-2 px-4">
+    <header className="flex sticky top-0 z-50 w-full items-center border-b bg-white/30 bg-opacity-50 backdrop-blur-sm">
+      <div className="flex h-[--header-height] w-full items-center justify-between">
+        <div className="gap-2 px-4 flex items-center">
         <Button
           className="h-8 w-8"
           variant="ghost"
@@ -31,12 +33,12 @@ export function SiteHeader() {
         >
           <SidebarIcon />
         </Button>
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator orientation="vertical" className="mr-2 h-4 data-[orientation=verticall]:h-4" />
         <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">
-                Dashboard
+              <BreadcrumbLink href="#" className="text-emerald-500">
+                Dashboard 
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -45,8 +47,11 @@ export function SiteHeader() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <SearchForm className="w-full sm:ml-auto sm:w-auto" />
+        </div>
+        <div className="gap-4 px-4 flex items-center mr-6">
+        <FeedbackDialog />
         <UserButton />
+        </div>
       </div>
     </header>
   )

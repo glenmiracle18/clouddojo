@@ -12,11 +12,11 @@ const inter = Inter({ subsets: ["latin"] })
 const DashboardLayout = ({ children }: { children: React.ReactNode}) => {
   return (
     <div className="[--header-height:calc(theme(spacing.14))]">
-      <SidebarProvider className="flex flex-col">
-        <SiteHeader />
+      <SidebarProvider className="flex flex-col ">
         <div className="flex flex-1">
           <AppSidebar />
           <SidebarInset>
+        <SiteHeader />
             <div className={inter.className}>
               {children}
             </div>

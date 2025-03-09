@@ -120,7 +120,7 @@ export default function PracticeTestsPage() {
   return (
     <div className="flex min-h-screen bg-background">
 
-      <div className="flex-1 md:ml-72">
+      <div className="flex-1 container w-full">
         <div className="p-4 md:p-6 pt-16 md:pt-6">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
@@ -233,7 +233,7 @@ function TestCard({ test, view }: TestCardProps) {
   const getLevelColor = (level: string) => {
     switch (level) {
       case "beginner":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300"
       case "intermediate":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
       case "advanced":
@@ -247,7 +247,7 @@ function TestCard({ test, view }: TestCardProps) {
 
   if (view === "grid") {
     return (
-      <Card className="overflow-hidden transition-all hover:shadow-md">
+      <Card className={`overflow-hidden transition-all hover:shadow-md `}>
         <div className="aspect-video relative overflow-hidden">
           <img
             src={test.image || "/aws-bg-image.jpg"}
@@ -255,7 +255,7 @@ function TestCard({ test, view }: TestCardProps) {
             className="object-cover w-full h-full transition-transform hover:scale-105"
           />
           {test.price === null && (
-            <Badge className="absolute top-2 right-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-500">Free</Badge>
+            <Badge className="absolute top-2 right-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Free</Badge>
           )}
         </div>
         <CardHeader className="p-4 pb-0">
@@ -285,7 +285,7 @@ function TestCard({ test, view }: TestCardProps) {
           {test.price !== null ? (
             <span className="font-medium">${test.price.toFixed(2)}</span>
           ) : (
-            <span style={{ color: '#4ade80' }}>Free</span>
+            <span className="text-emerald-500">Free</span>
           )}
           <Link href={`/dashboard/practice/1`}>
           <Button>Start Test</Button>
