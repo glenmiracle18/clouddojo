@@ -10,6 +10,9 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Header from "@/components/header";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import Providers from "@/components/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
@@ -19,11 +22,12 @@ export const metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient();
   return (
-    <ClerkProvider>
-      <html lang="en" className="dark:dark">
-        <body className={`${inter.className} dark:bg-gray-900`}>{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className="dark:dark">
+      <body className={`${inter.className} dark:bg-gray-900`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   );
 }

@@ -39,6 +39,8 @@ import { TeamSwitcher } from "./team-switcher";
 import { SearchForm } from "./search-form";
 import { RiLogoutBoxLine } from "@remixicon/react";
 import { SignOutButton } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const data = {
   teams: [
@@ -47,11 +49,11 @@ const data = {
       logo: "/team-logo.webp",
     },
     {
-      name: "Acme Corp.",
+      name: "Dojo Corp.",
       logo: "/team-logo.webp",
     },
     {
-      name: "Evil Corp.",
+      name: "Glen Corp.",
       logo: "/team-logo.webp",
     },
   ],
@@ -68,7 +70,6 @@ const data = {
           title: "Home",
           url: "/dashboard",
           icon: SquareTerminal,
-          isActive: true,
         },
         {
           title: "Practice Tests",
@@ -90,9 +91,13 @@ const data = {
   
 }]}
 
-// const user = auth()
+
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // const user = auth()
+  const pathname = usePathname()
+  const isActive = (url: string) => url === pathname
   return (
     <Sidebar {...props}>
     <SidebarHeader>
@@ -113,13 +118,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className="group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
-                    isActive={item.isActive}
+                    className={isActive(item.url) ? "group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent from-emerald-500 to-emerald-500/40 data-[active=true]:bg-gradient-to-r data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto" : "group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-emerald-500 hover:to-emerald-500/40"}
+                    isActive={isActive(item.url)}
                   >
                     <a href={item.url}>
                       {item.icon && (
                         <item.icon
-                          className="text-muted-foreground/60 group-data-[active=true]/menu-button:text-primary"
+                          className={cn("text-muted-foreground/60", { "text-emerald-500": isActive(item.url) })}
                           size={22}
                           aria-hidden="true"
                         />
@@ -138,15 +143,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <hr className="border-t border-border mx-2 -mt-px" />
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton className="font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto">
-            <RiLogoutBoxLine
-              className="text-muted-foreground/60 group-data-[active=true]/menu-button:text-primary"
-              size={22}
-              aria-hidden="true"
-            />
-            {/* <span>Sign Out</span> */}
-            <SignOutButton />
-          </SidebarMenuButton>
+            <SignOutButton  />
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>

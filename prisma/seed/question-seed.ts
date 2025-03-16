@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
-const prisma  = new PrismaClient();
+const prisma = new PrismaClient();
 
 // Fix for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -18,83 +18,108 @@ interface QuestionData {
 }
 
 async function questionSeed() {
-
-   
-
     try {
         const jsonPath = path.join(__dirname, '../../public/data/questions.json');
         const rawData = fs.readFileSync(jsonPath, 'utf-8');
         const questionsData: QuestionData[] = JSON.parse(rawData);
 
-
-        // create quiz in db
+        // Create quiz in db
         const quiz = await prisma.quiz.create({
             data: {
-                title: "AWS Solutions Architect Assosciate Practice Questios 1",
-                description: "105 questions form Cohort 3",
-                isPublic: true, // later correct to isPublished
-                price: 0,
-               
+                title: "AWS Solutions Architect Associate Practice Questions 1",
+                description: "105 questions from Cohort 3",
+                isPublic: true, // Updated from isPublic
+                // price field removed if not in your updated schema
             }
         });
-        console.log(`Create quiz with ID: ${quiz.id}`);
+        console.log(`Created quiz with ID: ${quiz.id}`);
 
-        // prepare quetions for seeding
-        const questionRecords = questionsData.map((question) => {
+        // Create a default category if needed
+        let defaultCategory;
+        try {
+            defaultCategory = await prisma.category.findFirst({
+                where: { name: "AWS Solutions Architect" }
+            });
+            
+            if (!defaultCategory) {
+                defaultCategory = await prisma.category.create({
+                    data: {
+                        name: "AWS Solutions Architect",
+                        description: "Questions related to AWS Solutions Architect certification"
+                    }
+                });
+            }
+        } catch (error) {
+            console.warn("Could not create default category:", error);
+        }
+
+        // Process each question
+        for (const question of questionsData) {
             const options = question.options.map((option) => Object.values(option)[0]);
-
-
-            // basic checks
-            if(!question.q_text || !options.length || !question.correct_answer || !question.explanation) {
-                console.error(`Skipping question ${question.q_number} due to missing or  incomplete data`);
-                return null;
+            
+            // Basic checks
+            if(!question.q_text || !options.length || !question.correct_answer) {
+                console.error(`Skipping question ${question.q_number} due to missing data`);
+                continue;
             }
-            if(!options.length){
-                console.warn(`Question ${question.q_number} has fewer than 4 options: ${options.length}`);
-                return null;
+            
+            if(options.length < 2) {
+                console.warn(`Question ${question.q_number} has fewer than 2 options: ${options.length}`);
+                continue;
             }
 
-            // Handle multiple correct answers (comma-separated like "C, D" or with spaces like "C,D")
+            // Handle multiple correct answers
             let correctAnswers = question.correct_answer.split(/,\s*/).filter(Boolean).map((answer) => answer.trim());
             
-            // Validate all correct answers are valid options
+            // Validate correct answers are valid options
             const isValidAnswers = correctAnswers.every(answer => 
                 ['A', 'B', 'C', 'D', 'E'].includes(answer)
             );
             
             if (!isValidAnswers) {
                 console.error(`Question ${question.q_number} has invalid correct answer: ${question.correct_answer}`);
-                return null;
+                continue;
             }
 
-            const isMultiSelect = correctAnswers.length > 1;
-            if (isMultiSelect) {
+            // Determine question type
+            const questionType = correctAnswers.length > 1 ? "MULTIPLE" : "SINGLE";
+            if (questionType === "MULTIPLE") {
                 console.log(`Question ${question.q_number} has multiple correct answers: ${question.correct_answer}`);
             }
 
-            return {
-                quizId: quiz.id,
-                text: question.q_text,
-                options: options,
-                correctAnswer: correctAnswers,
-                explanation: question.explanation,
-                isMultiSelect: isMultiSelect,
-            };
-        }).filter((record) => record !== null); // remover invalid questions
+            // Create the question
+            const createdQuestion = await prisma.question.create({
+                data: {
+                    content: question.q_text,
+                    isMultiSelect: questionType === "MULTIPLE",
+                    difficultyLevel: "Medium", // Default difficulty, adjust as needed
+                    explanation: question.explanation || "",
+                    quizId: quiz.id,
+                    categoryId: defaultCategory?.id,
+                    // Create options with their correctness
+                    options: {
+                        create: options.map((optionText, index) => {
+                            const optionLetter = String.fromCharCode(65 + index); // A, B, C, D, E
+                            return {
+                                content: optionText,
+                                isCorrect: correctAnswers.includes(optionLetter)
+                            };
+                        })
+                    }
+                },
+                include: {
+                    options: true
+                }
+            });
+            
+            console.log(`Created question ID: ${createdQuestion.id} with ${createdQuestion.options.length} options`);
+        }
 
-
-        // seed data to prisma using a transaction
-        await prisma.$transaction(
-            questionRecords.map((record) => 
-                prisma.question.create({
-                    data: record!,
-                })
-            )
-        );
-
-        console.log(`Seeded ${questionRecords.length} questions succesfully`);
+        const totalQuestions = await prisma.question.count({
+            where: { quizId: quiz.id }
+        });
+        console.log(`Seeded ${totalQuestions} questions successfully`);
         
-
     } catch (error) {
         console.log("Error seeding questions: ", error);
         throw error;
@@ -103,10 +128,10 @@ async function questionSeed() {
     }
 }
 
-// function call for running
+// Function call for running
 questionSeed().then(() => {
     console.log("Seeding completed");
-    process.exit(0)
+    process.exit(0);
 })
 .catch((error) => {
     console.log("Error seeding questions: ", error);
