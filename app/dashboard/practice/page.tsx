@@ -1,40 +1,26 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
-  Search,
-  Filter,
-  ChevronDown,
   Clock,
   FileQuestion,
   Check,
-  SlidersHorizontal,
   LayoutGrid,
   List,
 } from "lucide-react"
 
 import { practiceTests, categories, levels, type PracticeTest } from "@/public/data/test-data"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
+
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import FilterComponent from "@/components/dashboard/filter-component"
 import SearchBar from "@/components/dashboard/search-bar"
 import Link from "next/link"
+import { GetPracticeTests } from "@/app/(actions)/get-quizes"
+import prisma from "@/lib/prisma"
+import { useQuery } from "@tanstack/react-query"
 
 export default function PracticeTestsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -44,6 +30,19 @@ export default function PracticeTestsPage() {
   const [sortBy, setSortBy] = useState<"popularity" | "questions" | "newest">("popularity")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+
+  const { data } = useQuery({
+    queryKey: ["practiceTests"],
+    queryFn: async () => await GetPracticeTests()
+  })
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      console.log("Practice tests fetched successfully:", data);
+      // Your success logic here
+    }
+  }, [isSuccess, data]);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories((prev) =>

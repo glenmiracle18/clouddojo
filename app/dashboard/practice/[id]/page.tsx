@@ -39,6 +39,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Confetti from 'react-confetti'
 
 // Mock test data
 const testData = {
@@ -132,10 +133,26 @@ export default function PracticeTestPage() {
   const [showResults, setShowResults] = useState(false)
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [showTimeWarning, setShowTimeWarning] = useState(false)
-  const confettiRef = useRef<HTMLDivElement>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0
+  })
 
   // Timer
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+    handleResize()
+
     if (isTestSubmitted || showResults) return
 
     const timer = setInterval(() => {
@@ -214,39 +231,15 @@ export default function PracticeTestPage() {
 
   // Submit test
   const handleSubmitTest = () => {
-    setIsTestSubmitted(true)
+   setIsTestSubmitted(true)
     setShowResults(true)
+    setShowConfetti(true)
+    
+    // Automatically hide confetti after 5 seconds
+    setTimeout(() => {
+      setShowConfetti(false)
+    }, 10000)
 
-    // Trigger confetti
-    if (confettiRef.current) {
-      const canvas = confetti.create(confettiRef.current, {
-        resize: true,
-        useWorker: true,
-      })
-
-      canvas({
-        particleCount: 200,
-        spread: 160,
-        origin: { y: 0.6 },
-      })
-
-      // Fire a few more bursts
-      setTimeout(() => {
-        canvas({
-          particleCount: 50,
-          spread: 80,
-          origin: { x: 0.2, y: 0.7 },
-        })
-      }, 500)
-
-      setTimeout(() => {
-        canvas({
-          particleCount: 50,
-          spread: 80,
-          origin: { x: 0.8, y: 0.7 },
-        })
-      }, 1000)
-    }
   }
 
   // Calculate results
@@ -303,7 +296,15 @@ export default function PracticeTestPage() {
       <div className="container max-w-4xl mx-auto p-4 md:p-6 pt-16 md:pt-6">
         <div className="relative">
           {/* Confetti canvas */}
-          <div ref={confettiRef} className="fixed inset-0 pointer-events-none z-50" />
+          {showConfetti && (
+            <Confetti
+              width={windowSize.width}
+              height={windowSize.height}
+              recycle={false}
+              numberOfPieces={500}
+              gravity={0.1}
+            />
+          )}
 
           <Card className="mb-8">
             <CardHeader className="pb-2">
