@@ -11,7 +11,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="">
+    <div className="min-h-screen flex flex-col">
       <header className="flex justify-end items-center p-4 gap-4 h-16">
         <SignedOut>
           <SignInButton />

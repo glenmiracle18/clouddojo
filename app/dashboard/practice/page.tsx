@@ -22,6 +22,7 @@ import { GetPracticeTests } from "@/app/(actions)/get-quizes"
 import prisma from "@/lib/prisma"
 import { useQuery } from "@tanstack/react-query"
 import { type DifficultyLevel, type Quiz } from "@prisma/client"
+import { UpgradeBadge } from "@/components/ui/upgrade-badge"
 
 export default function PracticeTestsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -95,7 +96,6 @@ export default function PracticeTestsPage() {
                       <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
                         {category?.label}
                         <button
-                          onClick={() => handleCategoryChange(categoryId)}
                           className="ml-1 rounded-full hover:bg-muted p-0.5"
                         >
                           <Check className="h-3 w-3" />
@@ -248,7 +248,7 @@ function TestCard({ test, view }: TestCardProps) {
             <span className="font-medium">Upgrade</span>
           )}
           <Link href={`/dashboard/practice/1`}>
-          <Button>Start Test</Button>
+          <Button className="bg-green-600">Start Test</Button>
           </Link>
         </CardFooter>
       </Card>
@@ -258,7 +258,7 @@ function TestCard({ test, view }: TestCardProps) {
       <Card className="overflow-hidden transition-all hover:shadow-md">
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/4 lg:w-1/5 aspect-video md:aspect-square relative overflow-hidden">
-            <img src="alt={test.title} "className="object-cover w-full h-full" />
+            <img src="/aws-bg-image.jpg"className="object-cover w-full h-full" />
             {test.free && (
               <Badge className="absolute top-2 right-2 bg-emerald-500 hover:bg-emerald-600">Free</Badge>
             )}
@@ -278,13 +278,11 @@ function TestCard({ test, view }: TestCardProps) {
               </div>
               <div className="flex items-center gap-2">
                 {test.free ? (
-                  <span className="font-medium">
-                    Pro
-                  </span>
+                  <UpgradeBadge size="sm" />
                 ) : (
                   <span className="font-medium text-emerald-600">Free</span>
                 )}
-                <Button>Start Test</Button>
+                <Button disabled={!(test.free)} className="bg-orange-500" >Start Test</Button>
               </div>
             </div>
             <p className="text-muted-foreground text-sm mb-3">{test.description}</p>
