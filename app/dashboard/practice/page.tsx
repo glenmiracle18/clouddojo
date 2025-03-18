@@ -21,6 +21,7 @@ import Link from "next/link"
 import { GetPracticeTests } from "@/app/(actions)/get-quizes"
 import prisma from "@/lib/prisma"
 import { useQuery } from "@tanstack/react-query"
+import { type DifficultyLevel, type Quiz } from "@prisma/client"
 
 export default function PracticeTestsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -30,12 +31,14 @@ export default function PracticeTestsPage() {
   const [sortBy, setSortBy] = useState<"popularity" | "questions" | "newest">("popularity")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
 
-  const { data } = useQuery({
+  const { data, isSuccess, isLoading, isError} = useQuery({
     queryKey: ["practiceTests"],
     queryFn: async () => await GetPracticeTests()
   })
+
+  {isError && <div>Error fetching practice tests</div>}
+  {isLoading && <div>Loading practice tests...</div>}
 
   useEffect(() => {
     if (isSuccess && data) {
@@ -44,77 +47,16 @@ export default function PracticeTestsPage() {
     }
   }, [isSuccess, data]);
 
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
-    )
-  }
 
-  const handleLevelChange = (value: string) => {
-    setSelectedLevel(value)
-  }
-
-  const handlePriceFilterChange = (value: "all" | "free" | "paid") => {
-    setPriceFilter(value)
-  }
-
-  const clearFilters = () => {
-    setSelectedCategories([])
-    setSelectedLevel("all")
-    setPriceFilter("all")
-  }
 
   const applyFilters = () => {
     setIsFilterOpen(false)
   }
 
-  const filteredTests = useMemo(() => {
-    return practiceTests
-      .filter((test) => {
-        // Search filter
-        if (
-          searchQuery &&
-          !test.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !test.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !test.category.toLowerCase().includes(searchQuery.toLowerCase())
-        ) {
-          return false
-        }
+  if (!data) return [];
+  const tests = data.data
 
-        // Category filter
-        if (selectedCategories.length > 0 && !selectedCategories.includes(test.category.toLowerCase())) {
-          return false
-        }
 
-        // Level filter
-        if (selectedLevel !== "all" && test.level !== selectedLevel) {
-          return false
-        }
-
-        // Price filter
-        if (priceFilter === "free" && test.price !== null) {
-          return false
-        }
-        if (priceFilter === "paid" && test.price === null) {
-          return false
-        }
-
-        return true
-      })
-      .sort((a, b) => {
-        if (sortBy === "popularity") {
-          return b.popularity - a.popularity
-        } else if (sortBy === "questions") {
-          return b.questions - a.questions
-        } else {
-          // For "newest", we'll just use the id as a proxy since we don't have dates
-          return a.id.localeCompare(b.id)
-        }
-      })
-  }, [searchQuery, selectedCategories, selectedLevel, priceFilter, sortBy])
-
-  const activeFilterCount =
-    selectedCategories.length + (selectedLevel !== "all" ? 1 : 0) + (priceFilter !== "all" ? 1 : 0)
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -145,7 +87,7 @@ export default function PracticeTestsPage() {
                 <FilterComponent />
               </div>
 
-              {activeFilterCount > 0 && (
+              {tests.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {selectedCategories.map((categoryId) => {
                     const category = categories.find((c) => c.id === categoryId)
@@ -188,31 +130,28 @@ export default function PracticeTestsPage() {
 
             <div className="mt-2">
               <h2 className="text-lg font-medium mb-4">
-                {filteredTests.length} {filteredTests.length === 1 ? "Test" : "Tests"} Available
+                {tests.length} {tests.length === 1 ? "Test" : "Tests"} Available
               </h2>
 
               {view === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredTests.map((test) => (
+                  {tests.map((test) => (
                     <TestCard key={test.id} test={test} view="grid" />
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {filteredTests.map((test) => (
+                  {tests.map((test) => (
                     <TestCard key={test.id} test={test} view="list" />
                   ))}
                 </div>
               )}
 
-              {filteredTests.length === 0 && (
+              {tests.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <FileQuestion className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium">No tests found</h3>
-                  <p className="text-muted-foreground mt-1">Try adjusting your filters or search query</p>
-                  <Button variant="outline" className="mt-4" onClick={clearFilters}>
-                    Clear All Filters
-                  </Button>
+              
                 </div>
               )}
             </div>
@@ -223,9 +162,31 @@ export default function PracticeTestsPage() {
   )
 }
 
+
+
 interface TestCardProps {
-  test: PracticeTest
-  view: "grid" | "list"
+  test: {
+    id: string;
+    title: string;
+    description?: string | null;
+    level?: DifficultyLevel | null;
+    duration?: number | null;
+    free?: boolean | null;
+    questions: {
+      id: string;
+      content: string;
+      options: {
+        id: string;
+        content: string;
+        isCorrect: boolean;
+      }[];
+    }[] | null;
+    category?: {
+      id: string;
+      name: string;
+    } | null;
+  };
+  view: "grid" | "list";
 }
 
 function TestCard({ test, view }: TestCardProps) {
@@ -249,19 +210,19 @@ function TestCard({ test, view }: TestCardProps) {
       <Card className={`overflow-hidden transition-all hover:shadow-md `}>
         <div className="aspect-video relative overflow-hidden">
           <img
-            src={test.image || "/aws-bg-image.jpg"}
+            src="/aws-bg-image.jpg"
             alt={test.title}
             className="object-cover w-full h-full transition-transform hover:scale-105"
           />
-          {test.price === null && (
+          {test.free && (
             <Badge className="absolute top-2 right-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Free</Badge>
           )}
         </div>
         <CardHeader className="p-4 pb-0">
           <div className="flex justify-between items-start">
             <div>
-              <Badge variant="outline" className={`mb-2 ${getLevelColor(test.level)}`}>
-                {test.level.charAt(0).toUpperCase() + test.level.slice(1)}
+              <Badge variant="outline" className={`mb-2 ${getLevelColor(test.level!)}`}>
+                {test.level!.charAt(0).toUpperCase() + test.level!.slice(1)}
               </Badge>
               <h3 className="font-semibold text-lg line-clamp-1">{test.title}</h3>
             </div>
@@ -272,7 +233,7 @@ function TestCard({ test, view }: TestCardProps) {
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               <FileQuestion className="h-4 w-4 text-muted-foreground" />
-              <span>{test.questions} questions</span>
+              <span>{test.questions?.length} questions</span>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -281,10 +242,10 @@ function TestCard({ test, view }: TestCardProps) {
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          {test.price !== null ? (
-            <span className="font-medium">${test.price.toFixed(2)}</span>
-          ) : (
+          {test.free ? (
             <span className="text-emerald-500">Free</span>
+          ) : (
+            <span className="font-medium">Upgrade</span>
           )}
           <Link href={`/dashboard/practice/1`}>
           <Button>Start Test</Button>
@@ -297,22 +258,29 @@ function TestCard({ test, view }: TestCardProps) {
       <Card className="overflow-hidden transition-all hover:shadow-md">
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/4 lg:w-1/5 aspect-video md:aspect-square relative overflow-hidden">
-            <img src={test.image || "/placeholder.svg"} alt={test.title} className="object-cover w-full h-full" />
-            {test.price === null && (
+            <img src="alt={test.title} "className="object-cover w-full h-full" />
+            {test.free && (
               <Badge className="absolute top-2 right-2 bg-emerald-500 hover:bg-emerald-600">Free</Badge>
             )}
           </div>
           <div className="flex-1 p-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
               <div>
+                {
+                  test.level && (
                 <Badge variant="outline" className={`mb-2 ${getLevelColor(test.level)}`}>
                   {test.level.charAt(0).toUpperCase() + test.level.slice(1)}
                 </Badge>
+
+                  )
+                }
                 <h3 className="font-semibold text-lg">{test.title}</h3>
               </div>
               <div className="flex items-center gap-2">
-                {test.price !== null ? (
-                  <span className="font-medium">${test.price.toFixed(2)}</span>
+                {test.free ? (
+                  <span className="font-medium">
+                    Pro
+                  </span>
                 ) : (
                   <span className="font-medium text-emerald-600">Free</span>
                 )}
@@ -323,14 +291,14 @@ function TestCard({ test, view }: TestCardProps) {
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <FileQuestion className="h-4 w-4 text-muted-foreground" />
-                <span>{test.questions} questions</span>
+                <span>{test.questions?.length} questions</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span>{test.duration} min</span>
               </div>
               <Badge variant="outline" className="bg-background">
-                {test.category}
+                {test.level}
               </Badge>
             </div>
           </div>

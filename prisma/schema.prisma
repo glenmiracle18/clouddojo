@@ -26,12 +26,13 @@ model Quiz {
   id           String         @id @default(uuid())
   title        String
   description  String?
+  level        DifficultyLevel? @default(BEGINER)
   questions    Question[]
+  duration     Int?           // Duration of the quiz in minutes
   isPublic     Boolean        @default(false)
-  price        Float?
+  free         Boolean?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  purchases    Purchase[]
   userProgress UserProgress[]
   categoryId   String?
   category     Category?      @relation(fields: [categoryId], references: [id])
@@ -88,8 +89,6 @@ model Purchase {
   id          String   @id @default(uuid())
   userId      String
   user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  quizId      String
-  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   purchasedAt DateTime @default(now())
   price       Float
 }
@@ -154,3 +153,9 @@ model QuestionOption {
   @@index([questionId])
 }
 
+enum DifficultyLevel {
+  BEGINER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}

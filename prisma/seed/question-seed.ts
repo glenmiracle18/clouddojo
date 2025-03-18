@@ -30,6 +30,8 @@ async function questionSeed() {
                 description: "105 questions from Cohort 3",
                 isPublic: true, // Updated from isPublic
                 // price field removed if not in your updated schema
+                duration: 90,
+                free: true,
             }
         });
         console.log(`Created quiz with ID: ${quiz.id}`);
