@@ -10,15 +10,32 @@ generator client {
 
 // User model
 model User {
-  userId    String         @id @default(uuid())
-  email     String         @unique
-  firstName String         @unique
-  lastName  String
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  progress  UserProgress[]
-  purchases Purchase[]
-  quizAttempts QuizAttempt[]
+  userId        String         @id @default(uuid())
+  email         String         @unique
+  firstName     String         @unique
+  lastName      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  progress      UserProgress[]
+  purchases     Purchase[]
+  quizAttempts  QuizAttempt[]
+  onboarding    UserOnboarding?
+  hasCompletedOnboarding Boolean @default(false)
+}
+
+// UserOnboarding model
+model UserOnboarding {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  companyType   String?
+  companySize   String?
+  goals         String[]
+  preferredCertifications String[]
+  experience    String?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // Quiz model

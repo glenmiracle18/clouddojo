@@ -13,14 +13,15 @@ export async function GetPracticeTests(){
 
         const tests = await prisma.quiz.findMany({
             include: {
-                questions: {
-                    include: {
-                        options: true
+                _count: {
+                    select: {
+                        questions: true
                     }
                 },
                 category: true,
             }
         })
+
 
         console.log("Tests: ", tests);
         return {

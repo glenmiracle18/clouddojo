@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
 import { Bell, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,10 +20,25 @@ import FilterComponent from "@/components/dashboard/filter-component"
 import PerformanceSection from "@/components/dashboard/performance-section"
 import { DateRangePicker } from "@/components/dashboard/date-range-picker"
 import ViewToggle from "@/components/dashboard/view-toggle"
+import { useUserStatus } from "./hooks/useUserStatus"
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const { isLoaded } = useUser()
   const [view, setView] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(false)
+  const { 
+    isCheckingStatus, 
+    redirectToOnboardingIfNeeded,
+    isUserInitialized
+  } = useUserStatus()
+
+  // Check if the user has completed onboarding
+  useEffect(() => {
+    if (isUserInitialized) {
+      redirectToOnboardingIfNeeded()
+    }
+  }, [isUserInitialized, redirectToOnboardingIfNeeded])
 
   const handleRefresh = () => {
     setIsLoading(true)
@@ -29,6 +46,18 @@ export default function DashboardPage() {
     setTimeout(() => {
       setIsLoading(false)
     }, 1000)
+  }
+
+  // Show loading state while checking status
+  if (!isLoaded || isCheckingStatus) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

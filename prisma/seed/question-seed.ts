@@ -26,12 +26,12 @@ async function questionSeed() {
         // Create quiz in db
         const quiz = await prisma.quiz.create({
             data: {
-                title: "AWS Solutions Architect Associate Practice Questions 1",
-                description: "105 questions from Cohort 3",
+                title: "AWS Solutions Cloud Practioner Practice Questions 1",
+                description: "95 questions from Cohort 3",
                 isPublic: true, // Updated from isPublic
                 // price field removed if not in your updated schema
                 duration: 90,
-                free: true,
+                free: false,
             }
         });
         console.log(`Created quiz with ID: ${quiz.id}`);
@@ -40,14 +40,14 @@ async function questionSeed() {
         let defaultCategory;
         try {
             defaultCategory = await prisma.category.findFirst({
-                where: { name: "AWS Solutions Architect" }
+                where: { name: "AWS Cloud Practioner" }
             });
             
             if (!defaultCategory) {
                 defaultCategory = await prisma.category.create({
                     data: {
-                        name: "AWS Solutions Architect",
-                        description: "Questions related to AWS Solutions Architect certification"
+                        name: "AWS Cloud Practioner",
+                        description: "Questions related to AWS Cloud Practioner certification"
                     }
                 });
             }
