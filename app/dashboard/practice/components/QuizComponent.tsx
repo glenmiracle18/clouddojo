@@ -29,6 +29,8 @@ import { toast } from "sonner"
 import { QuizComponentProps, QuizWithRelations } from "../types"
 import Question from "./Question"
 import Results from "./Results"
+import { useQuery } from "@tanstack/react-query"
+import { CheckUser } from "@/app/(actions)/check-user"
 
 export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const router = useRouter()
@@ -41,41 +43,21 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const [showResults, setShowResults] = useState(false)
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [showTimeWarning, setShowTimeWarning] = useState(false)
-  const [quizStarted, setQuizStarted] = useState(false)
-  const [quizEnded, setQuizEnded] = useState(false)
-  const [timeTaken, setTimeTaken] = useState(0)
-  const [showReview, setShowReview] = useState(false)
-  const [userProfileChecked, setUserProfileChecked] = useState(false)
   const [userProfileExists, setUserProfileExists] = useState(false)
 
+  const { data: checkUserProfile, isLoading: isCheckingProfile } = useQuery({
+    queryKey: ["checkUserProfile"],
+    queryFn: () => CheckUser(),
+    enabled: isLoaded && !!user,
+  })
+
   useEffect(() => {
-    // Check if the user has a profile in our database
-    const checkUserProfile = async () => {
-      if (!isLoaded || !user) return;
-      
-      try {
-        const response = await fetch(`/api/users/check?userId=${user.id}`);
-        const data = await response.json();
-        
-        setUserProfileExists(data.exists);
-        setUserProfileChecked(true);
-        
-        if (!data.exists) {
-          toast.warning("Complete your profile setup to save quiz results", {
-            action: {
-              label: "Setup Profile",
-              onClick: () => router.push("/dashboard/profile"),
-            },
-            duration: 8000,
-          });
-        }
-      } catch (error) {
-        console.error("Error checking user profile:", error);
-      }
-    };
-    
-    checkUserProfile();
-  }, [isLoaded, user, router]);
+    if (checkUserProfile?.exists) {
+      setUserProfileExists(checkUserProfile.exists!)
+    } else {
+      router.push("/dashboard/profile")
+    }
+  }, [checkUserProfile])
 
   // Timer
   useEffect(() => {
@@ -112,6 +94,7 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const handleAnswerSelect = (questionId: string, optionId: string) => {
     const question = quiz.questions.find((q) => q.id === questionId)
 
+    // for single choice questions
     if (!question?.isMultiSelect) {
       setAnswers((prev) => ({
         ...prev,
@@ -201,6 +184,8 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
       />
     )
   }
+
+
 
   return (
     <div className="container max-w-6xl mx-auto p-4 md:p-6 pt-16 md:pt-6">

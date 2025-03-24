@@ -1,80 +1,71 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { useOnboarding } from "./OnboardingContext"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 
-interface CompanyOption {
-  id: string
-  label: string
-}
-
-const companyOptions: CompanyOption[] = [
-  { id: "Tech Startup", label: "Tech Startup" },
-  { id: "Software Agency", label: "Software Agency" },
-  { id: "Design Agency", label: "Design Agency" },
-  { id: "Freelancer", label: "Freelancer" },
-  { id: "Solopreneur", label: "Solopreneur" },
-  { id: "eCommerce Business", label: "eCommerce Business" },
-  { id: "Consulting Firm", label: "Consulting Firm" },
-  { id: "VC Firm", label: "VC Firm" },
-  { id: "University", label: "University" },
-  { id: "Tech Enterprise", label: "Tech Enterprise" },
-  { id: "Pre-Seed Startup", label: "Pre-Seed Startup" },
-  { id: "Legal Business", label: "Legal Business" },
+const companyTypes = [
+  { value: "Startup", label: "Startup", description: "Early-stage company with high growth potential" },
+  { value: "SMB", label: "Small/Medium Business", description: "Established business with less than 500 employees" },
+  { value: "Enterprise", label: "Enterprise", description: "Large organization with complex infrastructure" },
+  { value: "Educational", label: "Educational", description: "School, university or other educational institution" },
+  { value: "Non-profit", label: "Non-profit", description: "Charitable or community organization" }
 ]
 
 export default function CompanyTypeStep() {
   const { onboardingData, updateOnboardingData, goToNextStep } = useOnboarding()
-  const [selectedType, setSelectedType] = useState<string | null>(onboardingData.companyType)
-
-  const handleSelect = (type: string) => {
-    setSelectedType(type)
-    updateOnboardingData({ companyType: type })
+  const [companyType, setCompanyType] = useState<string>(onboardingData.companyType || "")
+  
+  const handleTypeChange = (value: string) => {
+    setCompanyType(value)
+    updateOnboardingData({ companyType: value })
   }
-
+  
   const handleContinue = () => {
-    if (selectedType) {
+    if (companyType) {
       goToNextStep()
     }
   }
-
+  
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Can you tell us about your company?</h1>
+        <h1 className="text-2xl font-bold">What type of organization are you?</h1>
         <p className="text-muted-foreground mt-2">
-          We've worked with small startups and Fortune 500 companies.
+          This helps us tailor your AWS certification experience to your specific needs.
         </p>
       </div>
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-medium">What kind of company are you?</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {companyOptions.map((option) => (
-            <button
-              key={option.id}
-              className={cn(
-                "py-3 px-4 rounded-lg border text-sm font-medium transition-colors",
-                selectedType === option.id
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
-                  : "border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800"
-              )}
-              onClick={() => handleSelect(option.id)}
-              type="button"
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex justify-end pt-4">
+      
+      <RadioGroup 
+        value={companyType} 
+        onValueChange={handleTypeChange}
+        className="space-y-3"
+      >
+        {companyTypes.map((type) => (
+          <div 
+            key={type.value}
+            className="flex items-center space-x-2 rounded-lg border p-4 cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10 transition-colors"
+            onClick={() => handleTypeChange(type.value)}
+          >
+            <RadioGroupItem value={type.value} id={type.value} />
+            <div className="grid gap-1.5">
+              <Label htmlFor={type.value} className="text-base font-medium cursor-pointer">
+                {type.label}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {type.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </RadioGroup>
+      
+      <div className="pt-4 flex justify-end">
         <Button 
-          onClick={handleContinue} 
-          disabled={!selectedType}
+          onClick={handleContinue}
+          disabled={!companyType}
           className="bg-emerald-600 hover:bg-emerald-700"
         >
           Continue

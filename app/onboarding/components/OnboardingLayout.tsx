@@ -1,61 +1,70 @@
 "use client"
 
-import React, { ReactNode } from "react"
+import React from "react"
+import OnboardingStepper from "./OnboardingStepper"
 import Image from "next/image"
-import { motion } from "framer-motion"
-import { Progress } from "@/components/ui/progress"
-
 interface OnboardingLayoutProps {
-  children: ReactNode
+  children: React.ReactNode
   currentStep: number
   totalSteps: number
-  logo?: string
 }
 
 export default function OnboardingLayout({
   children,
   currentStep,
   totalSteps,
-  logo = "/clouddojo-logo.png", // Your app logo
 }: OnboardingLayoutProps) {
-  const progress = Math.round((currentStep / totalSteps) * 100)
-
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <header className="w-full py-6 px-8 flex justify-center">
-        <div className="w-full max-w-screen-xl flex justify-between items-center">
-          <Image 
-            src={logo} 
-            alt="Cloud Dojo Logo" 
-            width={40} 
-            height={40}
-            className="rounded-md"
-          />
-          <div className="flex items-center space-x-2 w-1/3">
-            <Progress value={progress} className="h-2" />
-            <span className="text-sm text-muted-foreground">
-              {currentStep}/{totalSteps}
-            </span>
-          </div>
+    <div className="flex min-h-screen bg-background">
+      {/* Left sidebar with stepper */}
+      
+      <div className="hidden md:flex md:w-1/4 border-r p-6 lg:p-8 flex-col md:justify-center md:items-center">
+
+      <div className="flex items-center space-x-2 m-3 mb-20">
+        <Image src="/team-logo.webp" alt="Cloud Dojo" width={70} height={70} className="rounded-full" />
+        <h1 className="text-2xl font-bold font-serif">Cloud Dojo</h1>
+      </div>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold">
+            Set up your account
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Complete these steps to get started
+          </p>
         </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center p-6">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-          className="w-full max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8"
-        >
-          {children}
-        </motion.div>
-      </main>
-
-      <footer className="py-6 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} Cloud Dojo. All rights reserved.</p>
-      </footer>
+        
+        <OnboardingStepper />
+      </div>
+      
+      {/* Content area */}
+      <div className="flex-1 flex flex-col md:w-3/4">
+        <main className="flex-1 flex items-center justify-center p-4 md:p-8">
+          <div className="w-full max-w-3xl mx-auto">
+            {/* Mobile stepper - only show progress bar */}
+            <div className="mb-8 md:hidden">
+              <div className="flex justify-between items-center mb-2">
+                <h1 className="text-xl font-bold">
+                  Step {currentStep} of {totalSteps}
+                </h1>
+                <span className="text-sm text-muted-foreground">
+                  {Math.round((currentStep / totalSteps) * 100)}% Complete
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                <div
+                  className="bg-emerald-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                />
+              </div>
+            </div>
+            
+            {/* Current step content */}
+            <div className="bg-card border rounded-lg shadow-sm p-6">
+              {children}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 } 

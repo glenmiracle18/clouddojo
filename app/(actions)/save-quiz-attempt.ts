@@ -19,12 +19,12 @@ export async function SaveQuizAttempt({ quiz, answers, timeTaken, score }: SaveQ
       throw new Error("User not authenticated");
     }
 
-    // Check if user exists in our database
     let user = await prisma.user.findUnique({
       where: { userId }
     });
 
-    // If user doesn't exist, we can't create a quiz attempt
+
+    // if user is not found, we can't create a quiz attempt
     if (!user) {
       return {
         success: false,

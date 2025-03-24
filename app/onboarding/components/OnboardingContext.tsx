@@ -2,58 +2,46 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react"
 
-type CompanyType = "Tech Startup" | "Software Agency" | "Design Agency" | "Freelancer" | 
-  "Solopreneur" | "eCommerce Business" | "Consulting Firm" | "VC Firm" | 
-  "University" | "Tech Enterprise" | "Pre-Seed Startup" | "Legal Business" | string
-
-type CompanySize = "1-10 people" | "11-50 people" | "51-200 people" | "201-500 people" | "500+ people" | string
-
-type OnboardingGoal = "Learn AWS" | "Prepare for certification" | "Improve cloud skills" | 
-  "Career advancement" | "Team training" | "Academic purposes" | string
-
-type CertificationType = "AWS Solutions Architect" | "AWS Developer" | "AWS SysOps" | 
-  "AWS DevOps Engineer" | "AWS Security" | "AWS Database" | "AWS Machine Learning" | string
-
-type ExperienceLevel = "Beginner" | "Intermediate" | "Advanced" | "Expert" | string
-
+// Define the shape of your onboarding data
 interface OnboardingData {
-  companyType: CompanyType | null
-  companySize: CompanySize | null
-  goals: OnboardingGoal[]
-  preferredCertifications: CertificationType[]
-  experience: ExperienceLevel | null
+  companyType: string
+  companySize: string
+  goals: string[]
+  preferredCertifications: string[]
+  experience: string
 }
 
+// Define what the context will provide
 interface OnboardingContextType {
   currentStep: number
   totalSteps: number
   onboardingData: OnboardingData
-  setCurrentStep: (step: number) => void
   updateOnboardingData: (data: Partial<OnboardingData>) => void
   goToNextStep: () => void
   goToPreviousStep: () => void
+  goToStep: (step: number) => void
+  isStepComplete: (step: number) => boolean
 }
 
-const defaultOnboardingData: OnboardingData = {
-  companyType: null,
-  companySize: null,
-  goals: [],
-  preferredCertifications: [],
-  experience: null
-}
+// Create the context with a default value
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
 
-export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
-
+// Provider component that wraps your onboarding flow
 export function OnboardingProvider({ children }: { children: ReactNode }) {
+  // Track the current step
   const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 4 // Total number of steps in the onboarding process
+  const totalSteps = 4 // Total number of steps in your flow
   
-  const [onboardingData, setOnboardingData] = useState<OnboardingData>(defaultOnboardingData)
+  // Store all onboarding data
+  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    companyType: "",
+    companySize: "",
+    goals: [],
+    preferredCertifications: [],
+    experience: ""
+  })
   
-  const updateOnboardingData = (data: Partial<OnboardingData>) => {
-    setOnboardingData(prev => ({ ...prev, ...data }))
-  }
-  
+  // Navigation functions
   const goToNextStep = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1)
@@ -66,16 +54,45 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
   }
   
+  const goToStep = (step: number) => {
+    if (step >= 1 && step <= totalSteps) {
+      setCurrentStep(step)
+    }
+  }
+  
+  // Update onboarding data
+  const updateOnboardingData = (data: Partial<OnboardingData>) => {
+    setOnboardingData(prev => ({ ...prev, ...data }))
+  }
+  
+  // Check if a step is complete based on data
+  const isStepComplete = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        return !!onboardingData.companyType
+      case 2:
+        return !!onboardingData.companySize
+      case 3:
+        return onboardingData.goals.length > 0
+      case 4:
+        return !!onboardingData.experience
+      default:
+        return false
+    }
+  }
+  
+  // Provide the context values to all children components
   return (
     <OnboardingContext.Provider
       value={{
         currentStep,
         totalSteps,
         onboardingData,
-        setCurrentStep,
         updateOnboardingData,
         goToNextStep,
-        goToPreviousStep
+        goToPreviousStep,
+        goToStep,
+        isStepComplete
       }}
     >
       {children}
@@ -83,10 +100,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// Custom hook for using the context
 export function useOnboarding() {
   const context = useContext(OnboardingContext)
   if (context === undefined) {
-    throw new Error('useOnboarding must be used within an OnboardingProvider')
+    throw new Error("useOnboarding must be used within an OnboardingProvider")
   }
   return context
 } 

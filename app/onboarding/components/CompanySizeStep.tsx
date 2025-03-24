@@ -3,80 +3,68 @@
 import { useState } from "react"
 import { useOnboarding } from "./OnboardingContext"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { Slider } from "@/components/ui/slider"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 
-const sizeOptions = [
-  "1-10 people",
-  "11-50 people",
-  "51-200 people",
-  "201-500 people",
-  "500+ people",
+const companySizes = [
+  { value: "1-10", label: "1-10 employees", description: "Small team or startup" },
+  { value: "11-50", label: "11-50 employees", description: "Growing small business" },
+  { value: "51-200", label: "51-200 employees", description: "Medium-sized business" },
+  { value: "201-1000", label: "201-1000 employees", description: "Large business" },
+  { value: "1000+", label: "1000+ employees", description: "Enterprise organization" }
 ]
 
 export default function CompanySizeStep() {
   const { onboardingData, updateOnboardingData, goToNextStep, goToPreviousStep } = useOnboarding()
-  const [companySize, setCompanySize] = useState<string | null>(onboardingData.companySize)
+  const [companySize, setCompanySize] = useState<string>(onboardingData.companySize || "")
   
-  // Map slider value to company size options
-  const [sliderValue, setSliderValue] = useState(
-    companySize ? sizeOptions.indexOf(companySize) : 0
-  )
-
-  const handleSliderChange = (value: number[]) => {
-    const index = value[0]
-    setSliderValue(index)
-    const size = sizeOptions[index]
-    setCompanySize(size)
-    updateOnboardingData({ companySize: size })
+  const handleSizeChange = (value: string) => {
+    setCompanySize(value)
+    updateOnboardingData({ companySize: value })
   }
-
-  const handleContinue = () => {
-    if (companySize) {
-      goToNextStep()
-    }
-  }
-
+  
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">How large is your company?</h1>
+        <h1 className="text-2xl font-bold">How large is your organization?</h1>
         <p className="text-muted-foreground mt-2">
-          This helps us recommend the right resources for your team.
+          This helps us understand your infrastructure scale and needs.
         </p>
       </div>
-
-      <div className="space-y-8 py-4">
-        <div className="text-center font-medium text-lg">
-          {companySize || sizeOptions[sliderValue]}
-        </div>
-        
-        <div className="px-4">
-          <Slider
-            defaultValue={[sliderValue]}
-            max={sizeOptions.length - 1}
-            step={1}
-            onValueChange={handleSliderChange}
-            className="py-4"
-          />
-          
-          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>Small</span>
-            <span>Medium</span>
-            <span>Large</span>
+      
+      <RadioGroup 
+        value={companySize} 
+        onValueChange={handleSizeChange}
+        className="space-y-3"
+      >
+        {companySizes.map((size) => (
+          <div 
+            key={size.value}
+            className="flex items-center space-x-2 rounded-lg border p-4 cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10 transition-colors"
+            onClick={() => handleSizeChange(size.value)}
+          >
+            <RadioGroupItem value={size.value} id={size.value} />
+            <div className="grid gap-1.5">
+              <Label htmlFor={size.value} className="text-base font-medium cursor-pointer">
+                {size.label}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {size.description}
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div className="flex justify-between pt-4">
+        ))}
+      </RadioGroup>
+      
+      <div className="pt-4 flex justify-between">
         <Button
           variant="outline"
           onClick={goToPreviousStep}
         >
-          Go back
+          Back
         </Button>
         <Button 
-          onClick={handleContinue} 
+          onClick={goToNextStep}
           disabled={!companySize}
           className="bg-emerald-600 hover:bg-emerald-700"
         >

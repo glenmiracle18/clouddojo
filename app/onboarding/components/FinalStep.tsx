@@ -20,7 +20,7 @@ export default function FinalStep() {
   const { onboardingData, updateOnboardingData, goToPreviousStep } = useOnboarding()
   const { submitOnboardingData, isSubmitting } = useOnboardingQueries()
   
-  const [experience, setExperience] = useState<string | null>(onboardingData.experience)
+  const [experience, setExperience] = useState<string>(onboardingData.experience || "")
 
   const handleExperienceChange = (value: string) => {
     setExperience(value)
@@ -54,16 +54,22 @@ export default function FinalStep() {
         <div className="space-y-4">
           <h2 className="text-lg font-medium">What's your experience level with AWS?</h2>
           <RadioGroup 
-            value={experience || ""} 
+            value={experience} 
             onValueChange={handleExperienceChange}
             className="space-y-3"
           >
             {experienceOptions.map((option) => (
-              <div key={option.value} className="flex items-center space-x-2 rounded-md border p-3">
+              <div 
+                key={option.value}
+                className="flex items-center space-x-2 rounded-lg border p-4 cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10 transition-colors"
+                onClick={() => handleExperienceChange(option.value)}
+              >
                 <RadioGroupItem value={option.value} id={option.value} />
-                <Label htmlFor={option.value} className="flex-1 cursor-pointer">
-                  {option.label}
-                </Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor={option.value} className="text-base font-medium cursor-pointer">
+                    {option.label}
+                  </Label>
+                </div>
               </div>
             ))}
           </RadioGroup>
