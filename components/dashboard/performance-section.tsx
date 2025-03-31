@@ -2,17 +2,17 @@
 
 import { Card } from "@/components/ui/card"
 import { 
-  LineChart, 
-  Line, 
+  AreaChart, 
+  Area, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  TooltipProps
+  TooltipProps,
 } from "recharts"
 import { format } from "date-fns"
-import { InfoIcon } from "lucide-react"
+import { InfoIcon, TrendingDown, TrendingUp } from "lucide-react"
 
 import {
   Tooltip as UITooltip,
@@ -38,8 +38,8 @@ export default function PerformanceSection({
     return (
       <Card className="p-6">
         <div className="flex flex-col items-center justify-center py-10 text-center space-y-4">
-          <div className="rounded-full bg-primary/10 p-3">
-            <InfoIcon className="w-6 h-6 text-primary" />
+        <div className="rounded-full bg-emerald-500/20 p-3">
+            <InfoIcon className="w-6 h-6 text-emerald-500" />
           </div>
           <h3 className="text-lg font-semibold">No quiz attempts yet</h3>
           <p className="text-muted-foreground max-w-md">
@@ -77,9 +77,9 @@ export default function PerformanceSection({
   const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border rounded shadow-sm p-2 text-xs">
+        <div className="bg-emerald-500/10 border-dashed border-1 border-blue-900 italic font-serif rounded shadow-sm p-2 text-xs">
           <p className="font-medium">{label}</p>
-          <p>Score: {payload[0].value}%</p>
+          <p className="text-blue-700">Score: {payload[0].value}%</p>
         </div>
       )
     }
@@ -93,12 +93,14 @@ export default function PerformanceSection({
           <h2 className="text-lg font-semibold">Your Performance</h2>
           <TooltipProvider>
             <UITooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+              <TooltipTrigger asChild >
+                <div className="rounded-full bg-emerald-500/20 p-1 cursor-help">
+                  <InfoIcon className="w-4 h-4 text-emerald-600" />
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Track your quiz performance over time. Your scores are shown as percentages.
+              <TooltipContent className="bg-emerald-500/10">
+                <p className="max-w-xs text-sm font-serif italic font-extralight">
+                Your peformance and results from recent quiz attempts.
                 </p>
               </TooltipContent>
             </UITooltip>
@@ -110,25 +112,36 @@ export default function PerformanceSection({
             <p className="text-sm text-muted-foreground">Total Attempts</p>
             <p className="text-3xl font-bold">{stats.totalAttempts}</p>
             <p className="text-xs text-muted-foreground">Quiz attempts</p>
+            
           </Card>
           
           <Card className="p-4 flex flex-col gap-1">
             <p className="text-sm text-muted-foreground">Average Score</p>
             <p className="text-3xl font-bold">{Math.round(stats.averageScore)}%</p>
-            <p className="text-xs text-muted-foreground">Across all attempts</p>
+            <span className="flex justify-between items-center">
+              <p className="text-xs text-muted-foreground">Across all attempts</p>
+              <TrendingDown className="text-red-500 h-6 w-6" />
+            </span>
           </Card>
           
           <Card className="p-4 flex flex-col gap-1">
             <p className="text-sm text-muted-foreground">Highest Score</p>
             <p className="text-3xl font-bold">{Math.round(stats.highestScore)}%</p>
+            <span className="flex justify-between items-center">
             <p className="text-xs text-muted-foreground">Best performance</p>
+              { Math.round(stats.highestScore) < 50 ?
+                <TrendingDown className="text-red-500 h-6 w-6 " /> 
+              :
+                <TrendingUp className="text-emerald-500 h-6 w-6" /> 
+              }
+            </span>
           </Card>
         </div>
 
         <div className="h-[250px] mt-2">
           {chartData.length > 1 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                 <XAxis 
                   dataKey="formattedDate" 
@@ -144,15 +157,23 @@ export default function PerformanceSection({
                   tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Line
+                <defs>
+                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <Area
                   type="monotone"
                   dataKey="score"
                   stroke="#10b981"
                   strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorScore)"
                   dot={{ r: 4, strokeWidth: 2 }}
                   activeDot={{ r: 6, stroke: "#059669" }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="h-full flex items-center justify-center">

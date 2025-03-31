@@ -5,59 +5,59 @@ import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { CheckUser } from "@/app/(actions)/check-user";
+import { CreateUser } from "@/app/(actions)/create-user";
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
   const [isCreating, setIsCreating] = useState(false);
   const [isUserCreated, setIsUserCreated] = useState(false);
 
-  useEffect(() => {
-    async function checkUserExists() {
-      if (!user) return;
-      
-      try {
-        const response = await fetch(`/api/users/check?userId=${user.id}`);
-        const data = await response.json();
-        setIsUserCreated(data.exists);
-      } catch (error) {
-        console.error("Error checking user:", error);
+  // Query to check if user exists
+  const { data: checkedUser, error: checkError } = useQuery({
+    queryKey: ["checkUser"],
+    queryFn: () => CheckUser(),
+    enabled: isLoaded && !!user,
+  });
+
+  // Mutation to create user
+  const createUserMutation = useMutation({
+    mutationFn: () => CreateUser({
+      userId: user?.id as string,
+      email: user?.primaryEmailAddress?.emailAddress as string,
+      firstName: user?.firstName as string,
+      lastName: user?.lastName as string,
+    }),
+    onSuccess: (data) => {
+      if (data.isCreated) {
+        setIsUserCreated(true);
+        toast.success("Profile created successfully!");
+      } else {
+        toast.error(data.error || "Failed to create profile");
       }
+    },
+    onError: (error) => {
+      console.error("Error creating user:", error);
+      toast.error("Failed to create profile");
     }
-    
-    if (isLoaded && user) {
-      checkUserExists();
+  });
+
+  useEffect(() => {
+    if (checkedUser?.exists) {
+      setIsUserCreated(true);
+      toast.success("Profile already exists!");
+    } else {
+      setIsUserCreated(false);
     }
-  }, [isLoaded, user]);
+  }, [checkedUser]);
 
   const createUserProfile = async () => {
     if (!user) return;
     
     setIsCreating(true);
     try {
-      const response = await fetch("/api/users/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          email: user.primaryEmailAddress?.emailAddress,
-          firstName: user.firstName || "User",
-          lastName: user.lastName || "",
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setIsUserCreated(true);
-        toast.success("Profile created successfully!");
-      } else {
-        toast.error(data.error || "Failed to create profile");
-      }
-    } catch (error) {
-      console.error("Error creating user:", error);
-      toast.error("Failed to create profile");
+      await createUserMutation.mutateAsync();
     } finally {
       setIsCreating(false);
     }
@@ -70,6 +70,20 @@ export default function ProfilePage() {
           <CardContent className="pt-6">
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (checkError) {
+    return (
+      <div className="container max-w-4xl mx-auto p-4 md:p-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center text-red-500">
+              Error loading profile. Please try again later.
             </div>
           </CardContent>
         </Card>
@@ -113,10 +127,10 @@ export default function ProfilePage() {
                   </p>
                   <Button 
                     onClick={createUserProfile} 
-                    disabled={isCreating}
+                    disabled={isCreating || createUserMutation.isPending || isUserCreated}
                     className="mt-3"
                   >
-                    {isCreating ? "Creating..." : "Complete Setup"}
+                    {isCreating || createUserMutation.isPending ? "Creating..." : "Complete Setup"}
                   </Button>
                 </div>
               )}

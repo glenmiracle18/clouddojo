@@ -38,28 +38,21 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string[]>>({})
   const [markedQuestions, setMarkedQuestions] = useState<string[]>([])
-  const [timeLeft, setTimeLeft] = useState((quiz.duration || 30) * 60) // Default 30 minutes if not specified
+  const [timeLeft, setTimeLeft] = useState((quiz.duration || 30) * 60)
   const [isTestSubmitted, setIsTestSubmitted] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [showTimeWarning, setShowTimeWarning] = useState(false)
   const [userProfileExists, setUserProfileExists] = useState(false)
 
+  // Query to check user profile
   const { data: checkUserProfile, isLoading: isCheckingProfile } = useQuery({
     queryKey: ["checkUserProfile"],
     queryFn: () => CheckUser(),
     enabled: isLoaded && !!user,
   })
 
-  useEffect(() => {
-    if (checkUserProfile?.exists) {
-      setUserProfileExists(checkUserProfile.exists!)
-    } else {
-      router.push("/dashboard/profile")
-    }
-  }, [checkUserProfile])
-
-  // Timer
+  // Timer effect
   useEffect(() => {
     if (isTestSubmitted || showResults) return
 
@@ -71,7 +64,6 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
           return 0
         }
 
-        // Show warning when 1 minute left
         if (prev === 60) {
           setShowTimeWarning(true)
         }
@@ -82,6 +74,17 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
 
     return () => clearInterval(timer)
   }, [isTestSubmitted, showResults])
+
+  // Profile check effect
+  useEffect(() => {
+    if (!isLoaded || isCheckingProfile) return;
+
+    if (checkUserProfile?.exists) {
+      setUserProfileExists(true);
+    } else if (checkUserProfile?.exists === false) {
+      router.push("/dashboard/profile");
+    }
+  }, [checkUserProfile, isLoaded, isCheckingProfile, router]);
 
   // Format time
   const formatTime = (seconds: number) => {
@@ -94,14 +97,12 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const handleAnswerSelect = (questionId: string, optionId: string) => {
     const question = quiz.questions.find((q) => q.id === questionId)
 
-    // for single choice questions
     if (!question?.isMultiSelect) {
       setAnswers((prev) => ({
         ...prev,
         [questionId]: [optionId],
       }))
     } else {
-      // For multiple choice questions
       const currentAnswers = answers[questionId] || []
       const updatedAnswers = currentAnswers.includes(optionId)
         ? currentAnswers.filter((id) => id !== optionId)
@@ -172,6 +173,21 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
     setCurrentQuestionIndex(0)
   }
 
+  // Show loading state while checking profile
+  if (!isLoaded || isCheckingProfile) {
+    return (
+      <div className="container max-w-6xl mx-auto p-4 md:p-6 pt-16 md:pt-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (showResults) {
     return (
       <Results 
@@ -184,8 +200,6 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
       />
     )
   }
-
-
 
   return (
     <div className="container max-w-6xl mx-auto p-4 md:p-6 pt-16 md:pt-6">

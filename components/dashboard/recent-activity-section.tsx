@@ -1,28 +1,30 @@
-"use client"
+"use client";
 
-import { Card } from "@/components/ui/card"
-import { 
+import { Card } from "@/components/ui/card";
+import {
   Tooltip,
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { InfoIcon, ExternalLinkIcon } from "lucide-react"
-import { format } from "date-fns"
-import Link from "next/link"
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { InfoIcon, ExternalLinkIcon } from "lucide-react";
+import { format } from "date-fns";
+import Link from "next/link";
+import { ActivityItem } from "@/app/dashboard/practice/types";
+
+
 
 interface RecentActivityProps {
-  activity: any[] // Replace with proper type
-  isLoading: boolean
+  activity: ActivityItem[] | null;
+  isLoading: boolean;
 }
 
-export default function RecentActivitySection({ 
-  activity, 
-  isLoading 
+export default function RecentActivitySection({
+  activity,
+  isLoading,
 }: RecentActivityProps) {
-  
   // Loading state
   if (isLoading) {
     return (
@@ -42,16 +44,16 @@ export default function RecentActivitySection({
           </div>
         </div>
       </Card>
-    )
+    );
   }
-  
+
   // Empty state - no activity
   if (!activity || activity.length === 0) {
     return (
       <Card className="p-6">
         <div className="flex flex-col items-center justify-center py-10 text-center space-y-4">
-          <div className="rounded-full bg-primary/10 p-3">
-            <InfoIcon className="w-6 h-6 text-primary" />
+          <div className="rounded-full bg-emerald-500/20 p-3">
+            <InfoIcon className="w-6 h-6 text-emerald-500" />
           </div>
           <h3 className="text-lg font-semibold">No recent activity</h3>
           <p className="text-muted-foreground max-w-md">
@@ -59,9 +61,9 @@ export default function RecentActivitySection({
           </p>
         </div>
       </Card>
-    )
+    );
   }
-  
+
   return (
     <Card className="p-6">
       <div className="flex flex-col gap-5">
@@ -69,47 +71,50 @@ export default function RecentActivitySection({
           <h2 className="text-lg font-semibold">Recent Activity</h2>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+              <TooltipTrigger asChild >
+                <div className="rounded-full bg-emerald-500/20 p-1 cursor-help">
+                  <InfoIcon className="w-4 h-4 text-emerald-600" />
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
+              <TooltipContent className="bg-emerald-500/10">
+                <p className="max-w-xs text-sm font-serif italic font-extralight">
                   Your most recent quiz attempts and their results.
                 </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
-        
+
         <div className="space-y-4">
           {activity.slice(0, 5).map((item) => (
             <div key={item.id} className="flex items-start gap-3 py-2">
               {/* Score indicator */}
-              <div className={`h-12 w-12 rounded-md flex items-center justify-center font-medium text-white ${
-                item.score >= 80 ? "bg-emerald-500" : 
-                item.score >= 60 ? "bg-amber-500" : "bg-red-500"
-              }`}>
+              <div
+                className={`h-12 w-12 rounded-md flex items-center justify-center font-medium text-white ${
+                  item.score >= 80
+                    ? "bg-emerald-500"
+                    : item.score >= 60
+                    ? "bg-amber-500"
+                    : "bg-red-500"
+                }`}
+              >
                 {item.score}%
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium truncate">{item.quizTitle}</h3>
-                  <Badge variant="outline" className="text-xs">
-                    {item.category}
-                  </Badge>
+                  {/* just keep this out for nows */}
+                  {/* <Badge variant="outline" className="text-xs bg-emerald-400/10 border-emerald-500 text-emerald-600 truncate">
+                    {item.category.name}
+                  </Badge> */}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-emerald-700 mt-1">
                   {format(new Date(item.completedAt), "MMM d, yyyy • h:mm a")}
                 </p>
               </div>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto"
-                asChild
-              >
+
+              <Button variant="ghost" size="icon" className="ml-auto" asChild>
                 <Link href={`/results/${item.id}`}>
                   <ExternalLinkIcon className="h-4 w-4" />
                   <span className="sr-only">View results</span>
@@ -117,18 +122,16 @@ export default function RecentActivitySection({
               </Button>
             </div>
           ))}
-          
+
           {activity.length > 5 && (
             <div className="flex justify-center mt-2">
               <Button variant="outline" size="sm" asChild>
-                <Link href="/history">
-                  View All Activity
-                </Link>
+                <Link href="/history">View All Activity</Link>
               </Button>
             </div>
           )}
         </div>
       </div>
     </Card>
-  )
-} 
+  );
+}

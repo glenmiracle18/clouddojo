@@ -16,6 +16,20 @@ export interface TestCardProps {
   view: "grid" | "list";
 }
 
+export interface ActivityItem {
+  id: string;
+  quizId: string;
+  quizTitle: string;
+  category: {
+    name: string;
+    id: string;
+  };
+  score: number;
+  duration: number;
+  completedAt: Date | string;
+  formattedDate: string;
+};
+
 export interface QuizComponentProps {
   quiz: QuizWithRelations;
   quizId: string;

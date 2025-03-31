@@ -106,22 +106,42 @@ export async function fetchUserActivity() {
           select: {
             title: true,
             id: true,
-            categoryId: true
+            category: {
+              select: {
+                id: true,
+                name: true,
+                description: true
+              }
+            }
           }
-        }
+        },
       }
     })
     
-    const formattedActivity = recentActivity.map(activity => ({
-      id: activity.id,
-      quizId: activity.quizId,
-      quizTitle: activity.quiz.title,
-      categoryId: activity.quiz.categoryId || "uncategorized",
-      score: activity.percentageScore,
-      duration: activity.timeSpentSecs, // in seconds
-      completedAt: activity.completedAt || activity.startedAt,
-      formattedDate: formatDistanceToNow(new Date(activity.completedAt || activity.startedAt), { addSuffix: true })
-    }))
+
+    const formattedActivity = recentActivity.map(activity => {
+      const categoryData = activity.quiz.category;
+      
+      
+      return {
+        id: activity.id,
+        quizId: activity.quizId,
+        quizTitle: activity.quiz.title,
+        category: categoryData ? {
+          name: categoryData.name,
+          id: categoryData.id,
+          description: categoryData.description || "No description available"
+        } : {
+          name: "uncategorized",
+          id: "uncategorized",
+          description: "No category assigned"
+        },
+        score: activity.percentageScore,
+        duration: activity.timeSpentSecs,
+        completedAt: activity.completedAt || activity.startedAt,
+        formattedDate: formatDistanceToNow(new Date(activity.completedAt || activity.startedAt), { addSuffix: true })
+      }
+    })
     
     return {
       success: true,

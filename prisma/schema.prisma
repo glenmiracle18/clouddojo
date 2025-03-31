@@ -118,7 +118,7 @@ model Category {
   flashcards Flashcard[]
   questions  Question[]
   description String?
-  questionAttempts QuestionAttempt[]
+  quizAttempt QuizAttempt[]
 }
 
 // Enhanced Score Model for detailed performance tracking
@@ -131,12 +131,15 @@ model QuizAttempt {
   timeSpentSecs Int            // Total time spent on the quiz in seconds
   startedAt     DateTime       @default(now())
   completedAt   DateTime?
+  categoryId    String?
+  category      Category?      @relation(fields: [categoryId], references: [id])
   questions     QuestionAttempt[]
   quiz          Quiz           @relation(fields: [quizId], references: [id])
   user          User?          @relation(fields: [userId], references: [userId])
   
   @@index([userId])
   @@index([quizId])
+  @@index([categoryId])
 }
 
 model QuestionAttempt {
@@ -152,8 +155,6 @@ model QuestionAttempt {
   
   quizAttempt   QuizAttempt  @relation(fields: [quizAttemptId], references: [id], onDelete: Cascade)
   question      Question     @relation(fields: [questionId], references: [id])
-  category      Category?    @relation(fields: [categoryId], references: [id])
-  
   @@index([quizAttemptId])
   @@index([questionId])
   @@index([categoryId])
