@@ -11,13 +11,16 @@ export function useDashboardQueries(enabled: boolean) {
   // Query for user performance stats
   const { 
     data: performanceData,
-    isLoading: isLoadingPerformance
+    isLoading: isLoadingPerformance,
+    refetch: performanceRefetch
   } = useQuery({
     queryKey: ['performanceStats'],
     queryFn: async () => fetchUserPerformanceStats(),
     enabled,
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
+  
+ 
   
   // Query for user activity history
   const {
@@ -49,6 +52,7 @@ export function useDashboardQueries(enabled: boolean) {
   return {
     performanceStats,
     activityHistory,
+    performanceRefetch,
     categories,
     hasAttempts: performanceData?.hasAttempts || false,
     isLoadingPerformance,

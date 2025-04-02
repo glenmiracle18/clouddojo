@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import React from "react"
 
 export default function DashboardPage() {
   const [view, setView] = useState<"grid" | "list">("grid")
@@ -35,13 +36,27 @@ export default function DashboardPage() {
     ]
   })
 
-  const handleRefresh = () => {
-    setIsLoading(true)
+  // Define a stable function using useCallback
+  const handleRefresh = React.useCallback(() => {
+    setIsLoading(true);
     // Simulate data fetching
     setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-  }
+      setIsLoading(false);
+    }, 1000);
+  }, []); // Empty dependency array since it doesn't depend on any props/state
+
+  // Add effect to listen for refresh event
+  React.useEffect(() => {
+    const handleRefreshEvent = () => {
+      handleRefresh();
+    };
+    
+    window.addEventListener('performance-refresh-requested', handleRefreshEvent);
+    
+    return () => {
+      window.removeEventListener('performance-refresh-requested', handleRefreshEvent);
+    };
+  }, [handleRefresh]);
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -96,6 +111,7 @@ export default function DashboardPage() {
                   hasAttempts={true}
                   stats={performanceData}
                   isLoading={isLoading}
+                  refetch={handleRefresh}
                 />
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

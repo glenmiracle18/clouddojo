@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import PerformanceSection from "@/components/dashboard/performance-section";
 import RecentActivitySection from "@/components/dashboard/recent-activity-section";
@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Zap } from "lucide-react";
 import PremiumAnalysisDashboard from "@/components/ai-report/premium-ai-analysis";
+import React from "react";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -19,12 +20,21 @@ export default function DashboardPage() {
   const {
     performanceStats,
     activityHistory,
-    categories,
+    performanceRefetch,
     hasAttempts,
     isLoadingPerformance,
     isLoadingActivity,
     isLoadingCategories,
   } = useDashboardQueries(isLoaded && !!user);
+
+  // Add effect to listen for refresh event as a fallback
+  useEffect(() => {
+    const handleRefreshEvent = () => {
+      if (typeof performanceRefetch === 'function') {
+        performanceRefetch();
+      }
+    };
+  }, [performanceRefetch]);
 
   const interval = setInterval(() => {
     setProgress((prev) => {
@@ -92,6 +102,7 @@ export default function DashboardPage() {
                   hasAttempts={hasAttempts}
                   stats={performanceStats || {}}
                   isLoading={isLoadingPerformance}
+                  refetch={performanceRefetch}
                 />
               </Suspense>
 

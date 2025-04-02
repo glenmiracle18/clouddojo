@@ -24,8 +24,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { ResultsProps } from "../types"
 import QuestionAnalysis from "./QuestionAnalysis"
 import PDFGenerator from "./PDFGenerator"
-import { SaveQuizAttempt } from "@/app/(actions)/quiz/attempts/save-quiz-attempt"
-import { toast } from "sonner"
 
 export default function Results({
   quiz,
@@ -37,7 +35,6 @@ export default function Results({
 }: ResultsProps) {
   const router = useRouter()
   const [showConfetti, setShowConfetti] = useState(true)
-  const [attemptSaved, setAttemptSaved] = useState(false)
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 0,
     height: typeof window !== 'undefined' ? window.innerHeight : 0
@@ -45,47 +42,6 @@ export default function Results({
 
   // Results data
   const results = calculateResults()
-
-  // Save attempt to database when results are displayed
-  useEffect(() => {
-    const saveAttempt = async () => {
-      if (attemptSaved) return;
-
-      try {
-        const response = await SaveQuizAttempt({
-          quiz,
-          answers,
-          timeTaken,
-          score: results.correct
-        });
-
-        if (response.success) {
-          setAttemptSaved(true);
-          toast.success("Quiz attempt saved successfully");
-        } else {
-          if (response.error?.includes("User not found in database")) {
-            toast.error(
-              "Please complete your profile setup to save quiz results",
-              {
-                action: {
-                  label: "Setup Profile",
-                  onClick: () => router.push("/dashboard/profile"),
-                },
-              }
-            );
-          } else {
-            toast.error(response.error || "Failed to save quiz attempt");
-          }
-          console.error("Error saving quiz attempt:", response.error);
-        }
-      } catch (error) {
-        toast.error("Failed to save quiz attempt");
-        console.error("Error saving quiz attempt:", error);
-      }
-    };
-
-    saveAttempt();
-  }, [quiz, answers, timeTaken, attemptSaved, results.correct, router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -312,10 +268,10 @@ export default function Results({
             <Button
               variant="outline"
               className="flex items-center gap-2"
-              onClick={() => router.push(`/dashboard/practice/${quiz.id}/attempts/${attemptSaved}/analysis`)}
+              onClick={() => router.push(`/dashboard/`)}
             >
               <Brain className="h-4 w-4" />
-              View AI Analysis
+              View Analytics
             </Button>
 
             <Button

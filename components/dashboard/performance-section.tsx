@@ -12,7 +12,7 @@ import {
   TooltipProps,
 } from "recharts"
 import { format } from "date-fns"
-import { InfoIcon, TrendingDown, TrendingUp } from "lucide-react"
+import { InfoIcon, RefreshCcwDot, TrendingDown, TrendingUp } from "lucide-react"
 
 import {
   Tooltip as UITooltip,
@@ -20,17 +20,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Button } from "../ui/button"
+import { cn } from "@/lib/utils"
 
 interface PerformanceSectionProps {
   hasAttempts: boolean
   stats: any // Replace with proper type
   isLoading: boolean
+  refetch?: () => void  // Make refetch optional
 }
 
 export default function PerformanceSection({ 
   hasAttempts, 
   stats, 
-  isLoading 
+  isLoading,
+  refetch = () => {} // Empty default function
 }: PerformanceSectionProps) {
   
   // If there are no attempts, show the empty state
@@ -109,20 +113,41 @@ export default function PerformanceSection({
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Your Performance</h2>
-          <TooltipProvider>
-            <UITooltip>
-              <TooltipTrigger asChild >
-                <div className="rounded-full bg-emerald-500/20 p-1 cursor-help">
-                  <InfoIcon className="w-4 h-4 text-emerald-600" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="bg-emerald-500/10">
-                <p className="max-w-xs text-sm font-serif italic font-extralight">
-                Your peformance and results from recent quiz attempts.
-                </p>
-              </TooltipContent>
-            </UITooltip>
-          </TooltipProvider>
+          <span className="flex items-center gap-2">
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild >
+                  <div className="rounded-full bg-emerald-500/20 p-1 cursor-help">
+                    <InfoIcon className="w-4 h-4 text-emerald-600" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-emerald-500/10">
+                  <p className="max-w-xs text-sm font-serif italic font-extralight">
+                  Your performance and results from recent quiz attempts.
+                  </p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                if (typeof refetch === 'function') {
+                  refetch();
+                } else {
+                  // Fallback behavior using custom event
+                  const event = new CustomEvent('performance-refresh-requested');
+                  window.dispatchEvent(event);
+                }
+              }}
+              disabled={isLoading}
+              className="h-8 w-8"
+            >
+              <RefreshCcwDot className={cn("h-4 w-4", { "animate-spin": isLoading })} />
+              <span className="sr-only">Refresh data</span>
+            </Button>
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

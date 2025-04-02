@@ -31,6 +31,7 @@ import Question from "./Question"
 import Results from "./Results"
 import { useQuery } from "@tanstack/react-query"
 import { CheckUser } from "@/app/(actions)/user/check-user"
+import { useSaveQuizAttempt } from "../../hooks/useSaveQuizAttempts"
 
 export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const router = useRouter()
@@ -51,6 +52,8 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
     queryFn: () => CheckUser(),
     enabled: isLoaded && !!user,
   })
+
+  const { mutateAsync: saveQuizAttempt, isPending: isSaving } = useSaveQuizAttempt()
 
   // Timer effect
   useEffect(() => {
@@ -139,11 +142,41 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
     setCurrentQuestionIndex(index)
   }
 
+  // Calculate results
+  const calculateResults = () => {
+    let correct = 0;
+    quiz.questions.forEach((question) => {
+      const userAnswer = answers[question.id] || [];
+      if (
+        userAnswer.length === question.correctAnswer.length &&
+        userAnswer.every((ans) => question.correctAnswer.includes(ans))
+      ) {
+        correct++;
+      }
+    });
+    return correct;
+  };
+
   // Submit test
-  const handleSubmitTest = () => {
-    setIsTestSubmitted(true)
-    setShowResults(true)
-  }
+  const handleSubmitTest = async () => {
+    try {
+      const response = await saveQuizAttempt({
+        quiz,
+        answers,
+        timeTaken: (quiz.duration || 30) * 60 - timeLeft,
+        score: calculateResults()
+      });
+
+      if (response.success) {
+        setIsTestSubmitted(true);
+        setShowResults(true);
+        setShowSubmitDialog(false);
+      }
+    } catch (error) {
+      // Error is handled by the mutation's onError
+      console.error("Error submitting test:", error);
+    }
+  };
 
   // Check if a question is answered
   const isQuestionAnswered = (questionId: string) => {
@@ -344,8 +377,13 @@ export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Continue Test</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSubmitTest}>Submit Test</AlertDialogAction>
+            <AlertDialogCancel disabled={isSaving}>Continue Test</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleSubmitTest} 
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Submit Test"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
