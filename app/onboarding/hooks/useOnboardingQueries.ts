@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { saveOnboardingData, getOnboardingData, checkOnboardingStatus } from "@/app/(actions)/onboarding"
+import { saveOnboardingData, getOnboardingData, checkOnboardingStatus } from "@/app/(actions)/onboarding/onboarding"
 
 interface OnboardingMutationOptions {
   onSuccess?: () => void

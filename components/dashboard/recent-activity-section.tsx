@@ -13,6 +13,9 @@ import { InfoIcon, ExternalLinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import { ActivityItem } from "@/app/dashboard/practice/types";
+import { useState } from "react";
+import { useGetQuizAttempts } from "@/app/dashboard/hooks/useQuizAttempt";
+import { AttemptsDialog } from "./attempts-modal";
 
 
 
@@ -25,6 +28,12 @@ export default function RecentActivitySection({
   activity,
   isLoading,
 }: RecentActivityProps) {
+
+  const [slice, setSlice] = useState(5);
+  const isExpanded = slice > 5;
+
+
+
   // Loading state
   if (isLoading) {
     return (
@@ -86,7 +95,7 @@ export default function RecentActivitySection({
         </div>
 
         <div className="space-y-4">
-          {activity.slice(0, 5).map((item) => (
+          {activity.slice(0, slice).map((item) => (
             <div key={item.id} className="flex items-start gap-3 py-2">
               {/* Score indicator */}
               <div
@@ -114,19 +123,18 @@ export default function RecentActivitySection({
                 </p>
               </div>
 
-              <Button variant="ghost" size="icon" className="ml-auto" asChild>
-                <Link href={`/results/${item.id}`}>
-                  <ExternalLinkIcon className="h-4 w-4" />
-                  <span className="sr-only">View results</span>
-                </Link>
-              </Button>
+             <AttemptsDialog attemptId={item.id}/>
             </div>
           ))}
 
           {activity.length > 5 && (
             <div className="flex justify-center mt-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/history">View All Activity</Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setSlice(isExpanded ? 5 : activity.length)}
+              >
+                {isExpanded ? "Show Less" : "View All Activity"}
               </Button>
             </div>
           )}

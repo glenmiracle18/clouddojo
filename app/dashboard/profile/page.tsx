@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckUser } from "@/app/(actions)/check-user";
-import { CreateUser } from "@/app/(actions)/create-user";
+import { CheckUser } from "@/app/(actions)/user/check-user";
+import { CreateUser } from "@/app/(actions)/user/create-user";
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();

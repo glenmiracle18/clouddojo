@@ -1,33 +1,23 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import {
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
   BarChart4,
-  RefreshCw,
-  Eye,
-  ArrowLeft,
-  CheckSquare,
-  Square,
-  Circle,
-  CheckCircle2,
   Brain
 } from "lucide-react"
-import Confetti from 'react-confetti'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ResultsProps } from "../types"
 import QuestionAnalysis from "./QuestionAnalysis"
 import PDFGenerator from "./PDFGenerator"
-import { SaveQuizAttempt } from "@/app/(actions)/quiz/attempts/save-quiz-attempt"
-import { toast } from "sonner"
+import router from "next/router"
 
-export default function Results({
+export default function AttemptResults({
   quiz,
   answers,
   markedQuestions,
@@ -35,81 +25,8 @@ export default function Results({
   onRestart,
   onReview,
 }: ResultsProps) {
-  const router = useRouter()
-  const [showConfetti, setShowConfetti] = useState(true)
-  const [attemptSaved, setAttemptSaved] = useState(false)
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0
-  })
-
   // Results data
   const results = calculateResults()
-
-  // Save attempt to database when results are displayed
-  useEffect(() => {
-    const saveAttempt = async () => {
-      if (attemptSaved) return;
-
-      try {
-        const response = await SaveQuizAttempt({
-          quiz,
-          answers,
-          timeTaken,
-          score: results.correct
-        });
-
-        if (response.success) {
-          setAttemptSaved(true);
-          toast.success("Quiz attempt saved successfully");
-        } else {
-          if (response.error?.includes("User not found in database")) {
-            toast.error(
-              "Please complete your profile setup to save quiz results",
-              {
-                action: {
-                  label: "Setup Profile",
-                  onClick: () => router.push("/dashboard/profile"),
-                },
-              }
-            );
-          } else {
-            toast.error(response.error || "Failed to save quiz attempt");
-          }
-          console.error("Error saving quiz attempt:", response.error);
-        }
-      } catch (error) {
-        toast.error("Failed to save quiz attempt");
-        console.error("Error saving quiz attempt:", error);
-      }
-    };
-
-    saveAttempt();
-  }, [quiz, answers, timeTaken, attemptSaved, results.correct, router]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight
-      })
-    }
-
-    window.addEventListener('resize', handleResize)
-    handleResize()
-    
-    // Automatically hide confetti after 10 seconds
-    const timer = setTimeout(() => {
-      setShowConfetti(false)
-    }, 10000)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      clearTimeout(timer)
-    }
-  }, [])
 
   // Format time
   const formatTime = (seconds: number) => {
@@ -152,21 +69,10 @@ export default function Results({
 
   return (
     <div className="relative">
-      {/* Confetti canvas */}
-      {showConfetti && (
-        <Confetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={false}
-          numberOfPieces={500}
-          gravity={0.1}
-        />
-      )}
-
       <Card className="mb-8 mt-2 max-w-7xl mx-auto">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl">Test Results</CardTitle>
+            <CardTitle className="text-2xl">Quiz Results: {quiz.title}</CardTitle>
             <div className="text-2xl font-bold">
               Score:{" "}
               <span className={cn(results.score >= 70 ? "text-green-600" : "text-red-600")}>{results.score}%</span>
@@ -286,56 +192,20 @@ export default function Results({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-wrap gap-3 justify-between">
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => router.push("/dashboard/practice")}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Tests
-            </Button>
-            
-            <PDFGenerator 
-              quiz={quiz}
-              answers={answers}
-              score={results.score}
-              timeTaken={timeTaken}
-              correct={results.correct}
-              incorrect={results.incorrect}
-              skipped={results.skipped}
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => router.push(`/dashboard/practice/${quiz.id}/attempts/${attemptSaved}/analysis`)}
-            >
-              <Brain className="h-4 w-4" />
-              View AI Analysis
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={onReview}
-            >
-              <Eye className="h-4 w-4" />
-              Review Answers
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={onRestart}
-            >
-              <RefreshCw className="h-4 w-4" />
-              Restart Test
-            </Button>
-          </div>
+        <CardFooter className="flex justify-between">
+        <div className="text-sm text-gray-600  font-bold">
+          Date Taken: {quiz.createdAt.toLocaleDateString()}
+        </div>
+          <PDFGenerator 
+            quiz={quiz}
+            answers={answers}
+            score={results.score}
+            timeTaken={timeTaken}
+            correct={results.correct}
+            incorrect={results.incorrect}
+            skipped={results.skipped}
+          />
+          
         </CardFooter>
       </Card>
 

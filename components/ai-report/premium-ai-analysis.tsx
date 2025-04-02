@@ -8,6 +8,9 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { analyzeTestData } from "@/app/(actions)/ai-analysis/analyze-test-data"
+import AIAnalysisLoading from "@/app/components/ai-report/loading"
+import { format } from "date-fns"
 import {
   CheckCircle,
   AlertCircle,
@@ -28,98 +31,89 @@ import {
   Lightbulb,
   Layers,
   Shield,
+  RefreshCw,
 } from "lucide-react"
-import { ReportData, ReportSummary, CategoryScore, TimeDistribution, PerformanceHistory, MissedTopic, ExpandedSections, ReadinessCardProps, StudyPlanCardProps, MarkdownRendererProps } from "./types"
 
-
-
-// Sample data for demonstration
-const sampleReport: ReportData = {
-  summary: {
-    score: 78,
-    totalQuestions: 65,
-    correctAnswers: 51,
-    incorrectAnswers: 14,
-    timeSpent: "1h 45m",
-    testDate: "2025-03-25",
-    improvement: 12,
-    testName: "AWS Solutions Architect Associate - Practice Test 3",
-  },
-  categoryScores: [
-    { name: "Compute", score: 85, questions: 15 },
-    { name: "Storage", score: 92, questions: 12 },
-    { name: "Database", score: 75, questions: 10 },
-    { name: "Networking", score: 65, questions: 14 },
-    { name: "Security", score: 80, questions: 8 },
-    { name: "Serverless", score: 70, questions: 6 },
-  ],
-  strengths: [
-    "Strong understanding of EC2 instance types and use cases",
-    "Excellent grasp of S3 storage classes and lifecycle policies",
-    "Good knowledge of IAM roles and permissions",
-  ],
-  weaknesses: [
-    "Need improvement in VPC networking concepts",
-    "Limited understanding of AWS Lambda configuration options",
-    "Confusion between different database services (RDS, DynamoDB, Aurora)",
-  ],
-  recommendations: [
-    "Review VPC peering and subnet configuration documentation",
-    "Practice more Lambda-based scenarios, especially with environment variables and permissions",
-    "Complete the AWS database specialization module",
-    "Focus on the AWS Well-Architected Framework principles",
-  ],
-  detailedAnalysis: `
-    ## EC2 and Compute Services
-    
-    You demonstrated strong knowledge in EC2 instance selection, with 90% accuracy in questions related to instance types and their use cases. For example:
-    
-    > "When asked about memory-optimized instances for in-memory databases, you correctly identified R5 instances as the appropriate choice."
-    
-    However, there was some confusion regarding Auto Scaling policies and EC2 placement groups.
-    
-    ## Storage Solutions
-    
-    Your understanding of S3 storage classes is excellent, correctly answering all questions about:
-    
-    \`\`\`
-    S3 Standard
-    S3 Intelligent-Tiering
-    S3 Glacier Deep Archive
-    \`\`\`
-    
-    Areas for improvement include understanding the differences between EBS volume types and their performance characteristics.
-    
-    ## Networking
-    
-    This is your weakest area, with only 65% accuracy. Key concepts to review:
-    
-    1. VPC peering limitations
-    2. Transit Gateway configurations
-    3. Route table configurations
-    4. Network ACLs vs Security Groups
-  `,
-  timeDistribution: [
-    { category: "Easy Questions", time: 35, count: 30 },
-    { category: "Medium Questions", time: 45, count: 25 },
-    { category: "Hard Questions", time: 25, count: 10 },
-  ],
-  performanceHistory: [
-    { test: "Test 1", score: 65 },
-    { test: "Test 2", score: 72 },
-    { test: "Test 3", score: 78 },
-  ],
-  certificationReadiness: 75,
-  topMissedTopics: [
-    { topic: "VPC Networking", count: 5, importance: "High" },
-    { topic: "Lambda Configuration", count: 3, importance: "Medium" },
-    { topic: "EBS Volume Types", count: 2, importance: "Medium" },
-    { topic: "DynamoDB Indexes", count: 2, importance: "High" },
-  ],
+// --- Interface Definitions ---
+export type AIAnalysisProps = {
+  quizAttemptId?: string // Optional ID for specific test focus if needed
 }
 
-export default function PremiumAIAnalysisDashboard() {
+interface ExpandedSections {
+  strengths: boolean
+  weaknesses: boolean
+  recommendations: boolean
+  detailed: boolean
+}
+
+interface ReportData {
+  summary: {
+    score: number
+    totalQuestions: number
+    correctAnswers: number
+    incorrectAnswers: number
+    timeSpent: string
+    testDate: string
+    improvement: number
+    testName: string
+  }
+  categoryScores: Array<{
+    name: string
+    score: number
+    questions: number
+  }>
+  strengths: string[]
+  weaknesses: string[]
+  recommendations: string[]
+  detailedAnalysis: string
+  timeDistribution: Array<{
+    category: string
+    time: number
+    count: number
+  }>
+  performanceHistory: Array<{
+    test: string
+    score: number
+  }>
+  certificationReadiness: number
+  topMissedTopics: Array<{
+    topic: string
+    count: number
+    importance: string
+  }>
+  studyPlan?: Array<{
+    title: string
+    description: string
+    resources: string[]
+    priority: "High" | "Medium" | "Low"
+  }>
+}
+
+// Types for helper components
+interface ReadinessCardProps {
+  icon: ReactNode
+  title: string
+  value: string | number
+  description: string
+}
+
+interface MarkdownRendererProps {
+  content: string
+}
+
+interface StudyPlanCardProps {
+  title: string
+  description: string
+  resources: string[]
+  priority: "High" | "Medium" | "Low"
+}
+
+// --- Premium Analysis Dashboard Component ---
+export default function PremiumAnalysisDashboard({ quizAttemptId }: AIAnalysisProps) {
   const [isLoading, setIsLoading] = useState(true)
+  const [report, setReport] = useState<ReportData | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
   const [activeInsightTab, setActiveInsightTab] = useState("overview")
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
     strengths: true,
@@ -127,85 +121,90 @@ export default function PremiumAIAnalysisDashboard() {
     recommendations: true,
     detailed: false,
   })
-  const [progress, setProgress] = useState(0)
-  const chartRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef(null)
 
   const toggleSection = (section: keyof ExpandedSections) => {
-    setExpandedSections({
-      ...expandedSections,
-      [section]: !expandedSections[section],
-    })
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
   }
 
-  useEffect(() => {
-    // Simulated loading effect
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+  const loadAnalysis = async () => {
+    setIsLoading(true)
+    setError(null)
+    setProgress(0)
 
-    // Animated progress bar
-    const interval = setInterval(() => {
+    const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          return 100
+        if (prev >= 90) {
+          clearInterval(progressInterval)
+          return 90
         }
         return prev + 5
       })
-    }, 50)
+    }, 500)
 
-    return () => {
-      clearTimeout(timer)
-      clearInterval(interval)
-    }
-  }, [])
+    try {
+      const result = await analyzeTestData(quizAttemptId)
+      clearInterval(progressInterval)
 
-  // Draw charts after component mounts
-  useEffect(() => {
-    if (!isLoading && chartRef.current) {
-      drawCategoryChart()
-    }
-  }, [isLoading])
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Failed to analyze test data")
+      }
+      
+      console.log("AI Analysis Report:", result.data)
 
-  // Function to draw category performance chart
-  const drawCategoryChart = () => {
-    if (typeof window !== "undefined" && chartRef.current) {
-      // This would be implemented with a real chart library like Chart.js or D3
-      // For now, we'll use a placeholder
+      setReport(result.data)
+      
+      setProgress(100)
+
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 500)
+    } catch (err) {
+      clearInterval(progressInterval)
+      setError(err instanceof Error ? err.message : "An error occurred")
+      setIsLoading(false)
+      setProgress(0)
     }
   }
 
-  if (isLoading) {
+  useEffect(() => {
+    loadAnalysis()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizAttemptId])
+
+  // Draw charts after component mounts and data is loaded
+  useEffect(() => {
+    if (!isLoading && report && chartRef.current) {
+      // Implement chart drawing logic here if needed
+      // drawCategoryChart()
+    }
+  }, [isLoading, report])
+
+  const handleRerun = () => {
+    loadAnalysis()
+  }
+
+  if (error) {
     return (
-      <div className="bg-white flex flex-col items-center justify-center z-50 ">
-        <div className="w-64 mb-8">
-          <svg viewBox="0 0 100 100" className="animate-pulse-subtle">
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              stroke="#10b981"
-              strokeWidth="8"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray="251.2"
-              strokeDashoffset="125.6"
-              className="animate-dash"
-            />
-          </svg>
+      <div className="p-6 text-center">
+        <div className="text-red-500 mb-4 flex items-center justify-center">
+          <AlertCircle className="h-5 w-5 mr-2" /> Error: {error}
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Analyzing Your AWS Test Results</h2>
-        <p className="text-gray-600 mb-6">Our AI is processing your performance data</p>
-        <div className="w-80">
-          <Progress value={progress} className="h-2" />
-        </div>
-        <div className="mt-4 text-sm text-gray-500 flex items-center">
-          <Zap className="h-4 w-4 mr-1 text-emerald-500" />
-          Generating personalized insights
-        </div>
+        <Button onClick={() => window.location.reload()}>Try Again</Button>
       </div>
     )
   }
+  
+  // Show loading state until the report is available
+  if (isLoading || !report) {
+    return <AIAnalysisLoading progress={progress} />
+  }
+
+  // Use the fetched report data
+  const data = report
 
   return (
     <div className="container mx-auto py-6 px-4">
@@ -213,6 +212,7 @@ export default function PremiumAIAnalysisDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div className="flex items-center mb-4 md:mb-0">
           <div className="mr-3">
+            {/* SVG Logo */}
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="40" height="40" rx="8" fill="#10b981" fillOpacity="0.1" />
               <path
@@ -225,7 +225,8 @@ export default function PremiumAIAnalysisDashboard() {
           <div>
             <h1 className="text-2xl font-bold text-gray-800">AWS Certification AI Coach</h1>
             <div className="flex items-center">
-              <p className="text-gray-500 text-sm">{sampleReport.summary.testName}</p>
+              {/* Use data from the report */}
+              <p className="text-gray-500 text-sm">{data.summary.testName || "Overall Performance Analysis"}</p>
               <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
                 Premium Analysis
               </Badge>
@@ -233,6 +234,19 @@ export default function PremiumAIAnalysisDashboard() {
           </div>
         </div>
         <div className="flex space-x-3">
+          {/* Report status */}
+          <div className="flex items-center mr-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => loadAnalysis()}
+              disabled={isLoading}
+              className="text-blue-600 hover:text-blue-800 flex items-center"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" />
+              Refresh Analysis
+            </Button>
+          </div>
           <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
             <Download className="h-4 w-4 mr-2" />
             Export PDF
@@ -244,16 +258,16 @@ export default function PremiumAIAnalysisDashboard() {
         </div>
       </div>
 
-      {/* Score overview and certification readiness */}
+      {/* Score overview and certification readiness (Use data) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className="col-span-1 border-none shadow-lg overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white pb-0">
             <CardTitle className="flex justify-between items-center">
               <span>Overall Score</span>
-              <span className="text-3xl">{sampleReport.summary.score}%</span>
+              <span className="text-3xl">{data.summary.score}%</span>
             </CardTitle>
             <CardDescription className="text-emerald-100">
-              {sampleReport.summary.correctAnswers} of {sampleReport.summary.totalQuestions} questions correct
+              {data.summary.correctAnswers} of {data.summary.totalQuestions} questions correct
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
@@ -263,7 +277,7 @@ export default function PremiumAIAnalysisDashboard() {
                 <span className="text-gray-700">Improvement</span>
               </div>
               <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
-                +{sampleReport.summary.improvement}% from last test
+                +{data.summary.improvement}% from last test
               </Badge>
             </div>
             <Separator className="my-4" />
@@ -271,18 +285,19 @@ export default function PremiumAIAnalysisDashboard() {
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium text-gray-700">Time Efficiency</span>
-                  <span className="text-sm text-gray-500">{sampleReport.summary.timeSpent}</span>
+                  <span className="text-sm text-gray-500">{data.summary.timeSpent}</span>
                 </div>
-                <Progress value={85} className="h-2" />
+                {/* Consider adding a progress bar based on time or efficiency metric if available */}
+                {/* <Progress value={85} className="h-2" /> */}
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium text-gray-700">Accuracy</span>
                   <span className="text-sm text-gray-500">
-                    {Math.round((sampleReport.summary.correctAnswers / sampleReport.summary.totalQuestions) * 100)}%
+                    {Math.round((data.summary.correctAnswers / data.summary.totalQuestions) * 100)}%
                   </span>
                 </div>
-                <Progress value={78} className="h-2" />
+                <Progress value={data.summary.score} className="h-2" />
               </div>
             </div>
           </CardContent>
@@ -291,19 +306,19 @@ export default function PremiumAIAnalysisDashboard() {
         <Card className="col-span-1 lg:col-span-2 border-none shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle>Certification Readiness</CardTitle>
-            <CardDescription>Based on your performance across all practice tests</CardDescription>
+            <CardDescription>Based on your performance across recent practice tests</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative pt-4">
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium text-gray-700">Overall Readiness</span>
-                <span className="text-sm font-medium text-gray-700">{sampleReport.certificationReadiness}%</span>
+                <span className="text-sm font-medium text-gray-700">{data.certificationReadiness}%</span>
               </div>
               <div className="h-3 relative max-w-xl rounded-full overflow-hidden">
                 <div className="w-full h-full bg-gray-200 absolute"></div>
                 <div
                   className="h-full bg-gradient-to-r from-yellow-400 via-emerald-500 to-emerald-600 absolute"
-                  style={{ width: `${sampleReport.certificationReadiness}%` }}
+                  style={{ width: `${data.certificationReadiness}%` }}
                 ></div>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -313,25 +328,25 @@ export default function PremiumAIAnalysisDashboard() {
                 <span>Ready</span>
               </div>
 
-              {/* Certification readiness gauge markers */}
+              {/* Certification readiness gauge markers - Consider fetching these details from AI if needed */}
               <div className="mt-8 grid grid-cols-3 gap-4">
                 <ReadinessCard
                   icon={<BookMarked className="h-5 w-5 text-blue-500" />}
                   title="Knowledge Areas"
-                  value="4/5"
-                  description="Strong in most areas"
+                  value="Review Required" // Placeholder
+                  description="See Weaknesses tab"
                 />
                 <ReadinessCard
                   icon={<Clock className="h-5 w-5 text-emerald-500" />}
                   title="Time Management"
-                  value="Good"
-                  description="Completing within time limits"
+                  value="Check Analysis" // Placeholder
+                  description="See Time Distribution"
                 />
                 <ReadinessCard
                   icon={<Target className="h-5 w-5 text-blue-500" />}
-                  title="Exam Simulation"
-                  value="3 Tests"
-                  description="More practice recommended"
+                  title="Test History"
+                  value={`${data.performanceHistory.length} Tests Analyzed`}
+                  description="Review performance trends"
                 />
               </div>
             </div>
@@ -339,7 +354,7 @@ export default function PremiumAIAnalysisDashboard() {
         </Card>
       </div>
 
-      {/* Performance by category */}
+      {/* Performance by category (Use data) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className="col-span-1 lg:col-span-2 border-none shadow-lg">
           <CardHeader>
@@ -351,7 +366,7 @@ export default function PremiumAIAnalysisDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {sampleReport.categoryScores.map((category) => (
+              {data.categoryScores.map((category) => (
                 <div key={category.name}>
                   <div className="flex justify-between mb-1">
                     <div className="flex items-center">
@@ -392,7 +407,7 @@ export default function PremiumAIAnalysisDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {sampleReport.topMissedTopics.map((topic, index) => (
+              {data.topMissedTopics.map((topic, index) => (
                 <div key={index} className="flex items-center p-3 rounded-lg bg-gray-50 border border-gray-100">
                   <div
                     className={`w-2 h-10 rounded-full mr-3 ${topic.importance === "High" ? "bg-red-500" : "bg-yellow-500"}`}
@@ -421,7 +436,7 @@ export default function PremiumAIAnalysisDashboard() {
         </Card>
       </div>
 
-      {/* Insights Tabs */}
+      {/* Insights Tabs (Use data) */}
       <Card className="border-none shadow-lg mb-8">
         <CardHeader className="pb-0">
           <CardTitle className="flex items-center">
@@ -471,10 +486,9 @@ export default function PremiumAIAnalysisDashboard() {
                   </div>
                   <div>
                     <h3 className="text-lg font-medium text-gray-800 mb-1">AI Analysis Summary</h3>
+                    {/* Placeholder for AI Summary Text - consider adding this to the report */}
                     <p className="text-gray-600">
-                      You're showing good progress in your AWS certification journey. Your strengths lie in EC2 and S3
-                      services, while networking concepts need more attention. With focused study on your weak areas,
-                      you should be ready for certification within 3-4 weeks.
+                      Reviewing your performance across the last {data.performanceHistory.length} tests. Check other tabs for detailed insights.
                     </p>
                   </div>
                 </div>
@@ -487,12 +501,12 @@ export default function PremiumAIAnalysisDashboard() {
                     Performance Trend
                   </h3>
                   <div className="h-40 flex items-end justify-between">
-                    {sampleReport.performanceHistory.map((item, index) => (
+                    {data.performanceHistory.map((item, index) => (
                       <div key={index} className="flex flex-col items-center">
                         <div className="text-sm text-gray-500 mb-2">{item.score}%</div>
                         <div
                           className="w-12 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-md"
-                          style={{ height: `${item.score * 0.35}%` }}
+                          style={{ height: `${item.score * 0.35}%` }} // Adjust multiplier as needed
                         ></div>
                         <div className="text-sm text-gray-500 mt-2">{item.test}</div>
                       </div>
@@ -506,20 +520,20 @@ export default function PremiumAIAnalysisDashboard() {
                     Time Distribution
                   </h3>
                   <div className="space-y-4 mt-4">
-                    {sampleReport.timeDistribution.map((item, index) => (
+                    {data.timeDistribution.map((item, index) => (
                       <div key={index}>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm text-gray-600">
                             {item.category} ({item.count})
                           </span>
-                          <span className="text-sm text-gray-500">{item.time} min</span>
+                          <span className="text-sm text-gray-500">{Math.round(item.time / 60)} min</span>
                         </div>
                         <div className="h-2 relative rounded-full overflow-hidden">
                           <div className="w-full h-full bg-gray-200 absolute"></div>
                           <div
                             className={`h-full absolute ${index === 0 ? "bg-emerald-500" : index === 1 ? "bg-blue-500" : "bg-purple-500"}`}
                             style={{
-                              width: `${(item.time / sampleReport.timeDistribution.reduce((acc, curr) => acc + curr.time, 0)) * 100}%`,
+                              width: `${(item.time / data.timeDistribution.reduce((acc, curr) => acc + curr.time, 1)) * 100}%`, // Avoid division by zero
                             }}
                           ></div>
                         </div>
@@ -532,7 +546,7 @@ export default function PremiumAIAnalysisDashboard() {
 
             <TabsContent value="strengths" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {sampleReport.strengths.map((strength, index) => (
+                {data.strengths.map((strength, index) => (
                   <div
                     key={index}
                     className="bg-white rounded-lg border border-emerald-200 p-5 shadow-sm hover:shadow-md transition-shadow"
@@ -550,7 +564,7 @@ export default function PremiumAIAnalysisDashboard() {
 
             <TabsContent value="weaknesses" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {sampleReport.weaknesses.map((weakness, index) => (
+                {data.weaknesses.map((weakness, index) => (
                   <div
                     key={index}
                     className="bg-white rounded-lg border border-blue-200 p-5 shadow-sm hover:shadow-md transition-shadow"
@@ -568,7 +582,7 @@ export default function PremiumAIAnalysisDashboard() {
 
             <TabsContent value="recommendations" className="mt-0">
               <div className="space-y-4">
-                {sampleReport.recommendations.map((recommendation, index) => (
+                {data.recommendations.map((recommendation, index) => (
                   <div
                     key={index}
                     className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow"
@@ -593,7 +607,7 @@ export default function PremiumAIAnalysisDashboard() {
         </CardContent>
       </Card>
 
-      {/* Detailed Analysis Section */}
+      {/* Detailed Analysis Section (Use data) */}
       <Card className="border-none shadow-lg mb-8">
         <CardHeader
           className="flex flex-row items-center justify-between cursor-pointer"
@@ -613,58 +627,45 @@ export default function PremiumAIAnalysisDashboard() {
         {expandedSections.detailed && (
           <CardContent>
             <div className="prose max-w-none bg-white p-6 rounded-lg border border-gray-100">
-              <MarkdownRenderer content={sampleReport.detailedAnalysis} />
+              <MarkdownRenderer content={data.detailedAnalysis} />
             </div>
           </CardContent>
         )}
       </Card>
 
-      {/* Study Plan and Next Steps */}
-      <Card className="border-none shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <BookMarked className="h-5 w-5 mr-2 text-emerald-600" />
-            Personalized Study Plan
-          </CardTitle>
-          <CardDescription>Based on your performance, we recommend the following study plan</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StudyPlanCard
-              title="Week 1: Networking Focus"
-              description="Concentrate on VPC concepts, subnets, and routing"
-              resources={["AWS Networking Fundamentals", "VPC Deep Dive Workshop", "Practice Lab: VPC Peering"]}
-              priority="High"
-            />
-            <StudyPlanCard
-              title="Week 2: Serverless Applications"
-              description="Improve your understanding of Lambda and API Gateway"
-              resources={[
-                "Lambda Configuration Guide",
-                "Serverless Architecture Patterns",
-                "Practice Lab: Event-Driven Design",
-              ]}
-              priority="Medium"
-            />
-            <StudyPlanCard
-              title="Week 3: Database Services"
-              description="Focus on RDS, DynamoDB, and Aurora differences"
-              resources={[
-                "Database Selection Guide",
-                "DynamoDB Indexing Strategies",
-                "Practice Lab: Multi-AZ Deployments",
-              ]}
-              priority="Medium"
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">Generate Full Study Plan</Button>
-        </CardFooter>
-      </Card>
+      {/* Study Plan and Next Steps (Use data if available) */}
+      {data.studyPlan && data.studyPlan.length > 0 && (
+        <Card className="border-none shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BookMarked className="h-5 w-5 mr-2 text-emerald-600" />
+              Personalized Study Plan
+            </CardTitle>
+            <CardDescription>Based on your performance, we recommend the following study plan</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {data.studyPlan.map((planItem, index) => (
+                <StudyPlanCard
+                  key={index}
+                  title={planItem.title}
+                  description={planItem.description}
+                  resources={planItem.resources}
+                  priority={planItem.priority}
+                />
+              ))}
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">Generate Full Study Plan</Button>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   )
 }
+
+// --- Helper Components (with added types) ---
 
 // Helper component for readiness cards
 function ReadinessCard({ icon, title, value, description }: ReadinessCardProps) {

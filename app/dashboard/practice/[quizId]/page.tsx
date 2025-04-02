@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
-import { GetQuizById } from "@/app/(actions)/get-quiz"
+import { GetQuizById } from "@/app/(actions)/quiz/get-quiz"
 import QuizComponent from "../components/QuizComponent"
 import { QuizWithRelations } from "../types"
 
@@ -28,9 +28,9 @@ function QuizError({ error }: { error: string }) {
   )
 }
 
-export default async function PracticeTestPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const { data, error } = await GetQuizById(id)
+export default async function PracticeTestPage({ params }: { params: Promise<{ quizId: string }> }) {
+  const { quizId } = await params
+  const { data, error } = await GetQuizById(quizId)
   
   if (error) {
     return notFound()
@@ -40,7 +40,7 @@ export default async function PracticeTestPage({ params }: { params: Promise<{ i
 
   return (
     <Suspense fallback={<QuizLoading />}>
-      <QuizComponent quiz={quiz} quizId={id} />
+      <QuizComponent quiz={quiz} quizId={quizId} />
     </Suspense>
   )
 }

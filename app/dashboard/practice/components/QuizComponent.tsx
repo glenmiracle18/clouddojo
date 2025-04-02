@@ -30,7 +30,7 @@ import { QuizComponentProps, QuizWithRelations } from "../types"
 import Question from "./Question"
 import Results from "./Results"
 import { useQuery } from "@tanstack/react-query"
-import { CheckUser } from "@/app/(actions)/check-user"
+import { CheckUser } from "@/app/(actions)/user/check-user"
 
 export default function QuizComponent({ quiz, quizId }: QuizComponentProps) {
   const router = useRouter()

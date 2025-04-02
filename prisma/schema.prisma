@@ -21,6 +21,7 @@ model User {
   quizAttempts  QuizAttempt[]
   onboarding    UserOnboarding?
   hasCompletedOnboarding Boolean @default(false)
+  aiAnalysisReports AIAnalysisReport[]
 }
 
 // UserOnboarding model
@@ -176,4 +177,17 @@ enum DifficultyLevel {
   INTERMEDIATE
   ADVANCED
   EXPERT
+}
+
+// AIAnalysisReport model for caching AI analyses
+model AIAnalysisReport {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  reportData    Json     // Stores the full AI analysis report as JSON
+  generatedAt   DateTime @default(now())
+  expiresAt     DateTime // When this report expires (new one generated weekly)
+  lastRequestedAt DateTime @default(now()) // Track when the report was last viewed
+  
+  @@index([userId])
 }

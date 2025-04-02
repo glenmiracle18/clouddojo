@@ -77,9 +77,27 @@ export default function PerformanceSection({
   const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-emerald-500/10 border-dashed border-1 border-blue-900 italic font-serif rounded shadow-sm p-2 text-xs">
-          <p className="font-medium">{label}</p>
-          <p className="text-blue-700">Score: {payload[0].value}%</p>
+        <div className="border border-1 italic font-serif bg-white rounded shadow-sm p-2 text-xs">
+          <span className="flex items-center gap-2">
+            <span className = {`h-3 w-3 rounded-sm ${
+                  payload[0].value >= 80
+                    ? "bg-emerald-500"
+                    : payload[0].value >= 60
+                    ? "bg-amber-500"
+                    : "bg-red-500"
+                }`} />
+            <p className="font-medium">{label}</p>
+          </span>
+          <p className="text-muted-foreground">Score: 
+            <span className = {` ${payload[0].value >= 80
+                    ? "text-emerald-500"
+                    : payload[0].value >= 60
+                    ? "text-amber-500"
+                    : "text-red-500"
+                }`}>
+            {payload[0].value}%
+            </span>
+            </p>
         </div>
       )
     }

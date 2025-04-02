@@ -9,9 +9,9 @@ import CategoriesSection from "@/components/dashboard/categories-section";
 import { useDashboardQueries } from "./hooks/useDashboardQueries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import PremiumAIAnalysisDashboard from "@/components/ai-report/ai-analysis";
 import { Progress } from "@/components/ui/progress";
 import { Zap } from "lucide-react";
+import PremiumAnalysisDashboard from "@/components/ai-report/premium-ai-analysis";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="report">
           <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            <PremiumAIAnalysisDashboard />
+            <PremiumAnalysisDashboard />
           </main>
         </TabsContent>
       </Tabs>

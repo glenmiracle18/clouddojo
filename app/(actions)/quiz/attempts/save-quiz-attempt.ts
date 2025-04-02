@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { QuizWithRelations } from "../dashboard/practice/types";
+import { QuizWithRelations } from "../../../dashboard/practice/types";
 
 interface SaveQuizAttemptParams {
   quiz: QuizWithRelations;

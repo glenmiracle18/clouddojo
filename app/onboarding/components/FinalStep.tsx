@@ -39,6 +39,7 @@ export default function FinalStep() {
       userId: user.id,
       ...onboardingData,
     })
+    
   }
 
   return (

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { checkOnboardingStatus } from "@/app/(actions)/onboarding"
+import { checkOnboardingStatus } from "@/app/(actions)/onboarding/onboarding"
 
 export function useUserStatus() {
   const router = useRouter()
