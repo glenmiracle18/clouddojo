@@ -19,19 +19,19 @@ interface QuestionData {
 
 async function questionSeed() {
     try {
-        const jsonPath = path.join(__dirname, '../../public/data/questions.json');
+        const jsonPath = path.join(__dirname, '../../public/workflow/aws_sa_full_mock2.json');
         const rawData = fs.readFileSync(jsonPath, 'utf-8');
         const questionsData: QuestionData[] = JSON.parse(rawData);
 
         // Create quiz in db
         const quiz = await prisma.quiz.create({
             data: {
-                title: "AWS Solutions Cloud Practioner Practice Questions 1",
-                description: "95 questions from Cohort 3",
+                title: "AWS Solutions Architect Associate Full Mock 2",
+                description: "This quiz consists of 54 questions, designed to assess your knowledge and skills in AWS Solutions Architect Associate certification.",
                 isPublic: true, // Updated from isPublic
                 // price field removed if not in your updated schema
                 duration: 90,
-                free: false,
+                free: true, 
             }
         });
         console.log(`Created quiz with ID: ${quiz.id}`);
@@ -46,8 +46,8 @@ async function questionSeed() {
             if (!defaultCategory) {
                 defaultCategory = await prisma.category.create({
                     data: {
-                        name: "AWS Cloud Practioner",
-                        description: "Questions related to AWS Cloud Practioner certification"
+                        name: "AWS Associate",
+                        description: "Questions related to AWS Associate certification"
                     }
                 });
             }

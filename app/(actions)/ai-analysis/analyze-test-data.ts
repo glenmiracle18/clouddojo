@@ -5,7 +5,7 @@ import { formatTestDataForAI } from "./format-test-data"
 import { getUserTestData } from "./get-user-test-data"
 import type { TestData } from "./format-test-data"
 
-export async function analyzeTestData(quizAttemptId?: string) {
+export async function analyzeTestData() {
   try {
     // Get the API key from environment variables
     const apiKey = process.env.GEMINI_API_KEY
@@ -25,8 +25,8 @@ export async function analyzeTestData(quizAttemptId?: string) {
       },
     })
 
-    // Get and format test data - pass quizAttemptId as optional
-    const testDataResult = await getUserTestData(quizAttemptId)
+    // Get and format test data
+    const testDataResult = await getUserTestData()
     if (!testDataResult.success || !testDataResult.data) {
       throw new Error(testDataResult.error || "Failed to fetch test data")
     }
@@ -40,43 +40,58 @@ export async function analyzeTestData(quizAttemptId?: string) {
 You are an expert AWS certification analyst with deep knowledge of AWS services, best practices, and certification exams. 
 Your task is to analyze the provided AWS practice test results from the user's most recent tests (up to 5) and generate a comprehensive, detailed report in a specific JSON format.
 
-Test Data:
+# CONTEXT
+The user has completed multiple AWS practice tests, and we need a comprehensive analysis that:
+1. Provides insights across all recent tests
+2. Identifies consistent performance patterns
+3. Highlights areas of improvement and potential challenges
+4. Creates a personalized, adaptive study strategy
+
+# TEST DATA
 ${JSON.stringify(formattedData, null, 2)}
 
-Please analyze this data and provide a detailed report following this structure **EXACTLY**. Ensure all fields are populated with meaningful data based on the analysis. Do not use placeholders like "Unknown" or empty arrays for required fields.
+# ANALYSIS REQUIREMENTS
+1. Base primary metrics on the most recent test
+2. Analyze performance trends across all tests
+3. Identify consistent strengths and weaknesses
+4. Create a holistic view of the user's certification readiness
+5. Develop a targeted, adaptive study plan
 
-REQUIRED JSON STRUCTURE:
+# REQUIRED OUTPUT FORMAT
 {
   "summary": {
-    "score": number, // Overall score from the primary (usually latest) test
-    "totalQuestions": number, // Total questions from the primary test
-    "correctAnswers": number, // Correct answers from the primary test
-    "incorrectAnswers": number, // Incorrect answers from the primary test
-    "timeSpent": string, // Time spent on the primary test (e.g., "1h 45m")
-    "testDate": string, // Date of the primary test (ISO format preferred)
+    "score": number, // Overall sum score from all the most recent tests
+    "totalQuestions": number, // Total questions from all the analyzed tests
+    "correctAnswers": number, // Correct answers from all the analyzed tests
+    "incorrectAnswers": number, // Incorrect answers from the most recent test
+    "timeSpent": string, // Average time spent on each test(e.g., "1h 45m")
+    "testDate": string, // Date of the most recent test (ISO format preferred)
     "improvement": number, // Score improvement compared to the previous test in the history
-    "testName": string // Name of the primary test
+    "testName": string // List of test names or IDs from the most recent tests
   },
-  "categoryScores": Array<{ // Performance breakdown by category for the primary test
+  "categoryScores": Array<{ // Performance breakdown by category for the most recent test
     "name": string, // Category name, MUST NOT be null or "Unknown"
     "score": number, // Score (0-100)
     "questions": number // Number of questions in this category
   }>, // MUST NOT be an empty array if data exists
-  "strengths": string[], // List of key strengths identified across all tests. MUST NOT be empty.
-  "weaknesses": string[], // List of key weaknesses identified across all tests. MUST NOT be empty.
-  "recommendations": string[], // Actionable recommendations based on weaknesses. MUST NOT be empty.
-  "detailedAnalysis": string, // In-depth HTML formatted analysis covering performance trends, category insights, and time management across all provided tests. MUST provide substantial detail.
-  "timeDistribution": Array<{ // Time distribution for the primary test
-    "category": string, // e.g., "Easy Questions", "Compute Category"
+  "strengths": string[], // List of key strengths identified across all tests. MUST NOT be empty. Must be specific and actionable and must not be less than 3 items.
+  // e.g., "Strong in Compute Category with 90% accuracy"
+  "weaknesses": string[], // List of key weaknesses identified across all tests. MUST NOT be empty.Must be specific and actionable and must not be less than 3 items.
+  // e.g., "Weak in Networking Category with 60% accuracy"
+  // e.g., "Needs improvement in Security Category with 70% accuracy"
+  "recommendations": string[], // Actionable recommendations based on weaknesses. MUST NOT be empty and must not be less than 4 items.
+  "detailedAnalysis": string, // In-depth HTML formatted analysis covering performance trends, category insights, and time management across all provided tests. MUST provide substantial detail. I want this to be a comprehensive analysis of the user's performance, including specific examples and data points. It should not be less than 500 words. also format it in paragraphs and quotes and the rest as you see need be. Address the user as "you" and use a friendly tone. Avoid using "we" or "our".
+  "timeDistribution": Array<{ // Time distribution for all tests must not be less than 3 items.
+    "category": string, // e.g., "Easy ns", "Compute Category"
     "time": number, // Time spent in seconds
     "count": number // Number of questions in this category
   }>,
-  "performanceHistory": Array<{ // Score history from all provided tests (up to 5)
+  "performanceHistory": Array<{ // Score history from all provided tests (up to 5). must not be empty
     "test": string, // Test name or ID
     "score": number // Score (0-100)
   }>, // MUST reflect the userHistory provided
-  "certificationReadiness": number, // Overall readiness score (0-100) based on performance trends and recent scores. MUST be a calculated value.
-  "topMissedTopics": Array<{ // Top topics missed in the primary test
+  "certificationReadiness": number, // Overall readiness score (0-100) based on performance trends and recent scores from all the tests. MUST be a calculated value.
+  "topMissedTopics": Array<{ // Top topics missed in all the most recent tests. must not be less than 3 items
     "topic": string, // Topic name. MUST NOT be null or "Unknown".
     "count": number, // Number of questions missed
     "importance": string // e.g., "High", "Medium"
@@ -89,14 +104,13 @@ REQUIRED JSON STRUCTURE:
   }> // **MUST NOT be empty.** Provide at least 2-3 plan items.
 }
 
-ANALYSIS REQUIREMENTS:
-1.  **Base metrics** (summary, categoryScores, timeDistribution, topMissedTopics) primarily on the single quizAttempt provided in the input data.
-2.  **Analyze trends** using the performanceHistory data.
-3.  Derive strengths, weaknesses, recommendations, detailedAnalysis, certificationReadiness, and the mandatory studyPlan from a holistic view of **all** provided test data (quizAttempt and userHistory).
-4.  **Ensure data integrity:** All string fields must contain meaningful text. All scores must be calculated logically. Category/topic names must be accurate.
-5.  **Study Plan is MANDATORY:** Generate a concrete, actionable study plan with real, accessible web links for resources. Prioritize based on the analysis.
+# ANALYSIS APPROACH
+- Look for recurring themes across multiple tests
+- Identify skill progression and regression
+- Consider the entire test history, not just the most recent test
+- Provide nuanced, data-driven recommendations
 
-IMPORTANT: Return ONLY the JSON object conforming to the structure above. No markdown formatting, no introductory text, no explanations. Just the raw, valid JSON output.
+IMPORTANT: Return ONLY the JSON object conforming to the structure above. No additional text or explanations.
 `
 
     // Generate content from Gemini

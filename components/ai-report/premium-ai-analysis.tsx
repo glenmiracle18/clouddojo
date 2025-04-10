@@ -36,7 +36,7 @@ import {
 
 // --- Interface Definitions ---
 export type AIAnalysisProps = {
-  quizAttemptId?: string // Optional ID for specific test focus if needed
+  // No props needed since we always analyze the last 5 attempts
 }
 
 interface ExpandedSections {
@@ -109,7 +109,7 @@ interface StudyPlanCardProps {
 }
 
 // --- Premium Analysis Dashboard Component ---
-export default function PremiumAnalysisDashboard({ quizAttemptId }: AIAnalysisProps) {
+export default function PremiumAnalysisDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [report, setReport] = useState<ReportData | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -146,7 +146,7 @@ export default function PremiumAnalysisDashboard({ quizAttemptId }: AIAnalysisPr
     }, 500)
 
     try {
-      const result = await analyzeTestData(quizAttemptId)
+      const result = await analyzeTestData()
       clearInterval(progressInterval)
 
       if (!result.success || !result.data) {
@@ -172,8 +172,7 @@ export default function PremiumAnalysisDashboard({ quizAttemptId }: AIAnalysisPr
 
   useEffect(() => {
     loadAnalysis()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizAttemptId])
+  }, []) // Remove quizAttemptId dependency since we always analyze the last 5 attempts
 
   // Draw charts after component mounts and data is loaded
   useEffect(() => {

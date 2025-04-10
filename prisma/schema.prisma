@@ -138,6 +138,10 @@ model QuizAttempt {
   quiz          Quiz           @relation(fields: [quizId], references: [id])
   user          User?          @relation(fields: [userId], references: [userId])
   
+  // New fields for comprehensive analysis
+  analysisMetadata Json?       // Store additional analysis-related metadata
+  performanceFlags String[]    // Flags for performance characteristics
+  
   @@index([userId])
   @@index([quizId])
   @@index([categoryId])

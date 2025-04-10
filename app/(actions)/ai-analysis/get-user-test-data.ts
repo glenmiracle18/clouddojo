@@ -2,8 +2,9 @@
 
 import { auth } from "@clerk/nextjs/server"
 import prisma from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 
-export async function getUserTestData(quizAttemptId?: string) {
+export async function getUserTestData() {
   try {
     const { userId } = await auth()
 
@@ -11,7 +12,7 @@ export async function getUserTestData(quizAttemptId?: string) {
       return { success: false, error: "User not authenticated" }
     }
 
-    // Get user's latest 5 quiz attempts
+    // Get user's latest 5 quiz attempts with comprehensive data
     const quizAttempts = await prisma.quizAttempt.findMany({
       where: {
         userId,
@@ -31,7 +32,8 @@ export async function getUserTestData(quizAttemptId?: string) {
           include: {
             question: {
               include: {
-                category: true
+                category: true,
+                options: true  // Include question options for more detailed analysis
               }
             }
           }
@@ -48,81 +50,87 @@ export async function getUserTestData(quizAttemptId?: string) {
       return { success: false, error: "No completed quiz attempts found" }
     }
 
-    // Use the most recent quiz attempt as the primary one (or the specified one if provided)
-    const primaryAttempt = quizAttemptId 
-      ? quizAttempts.find((attempt: any) => attempt.id === quizAttemptId) || quizAttempts[0]
-      : quizAttempts[0]
+    // Comprehensive performance analysis across all attempts
+    const comprehensivePerformance = await prisma.$transaction([
+      // Category Performance
+      prisma.$queryRaw`
+        SELECT 
+          q."categoryId",
+          c.name as "categoryName",
+          COUNT(*) as "_count__all",
+          COUNT(CASE WHEN qa."isCorrect" = true THEN 1 END) as "_count_isCorrect",
+          AVG(CASE WHEN qa."isCorrect" = true THEN 1.0 ELSE 0.0 END) * 100 as "accuracyPercentage"
+        FROM "QuestionAttempt" qa
+        JOIN "Question" q ON qa."questionId" = q.id
+        LEFT JOIN "Category" c ON q."categoryId" = c.id
+        WHERE qa."quizAttemptId" IN (${Prisma.join(quizAttempts.map(a => a.id))})
+        GROUP BY q."categoryId", c.name
+      `,
 
-    // Get category performance for the primary attempt
-    const categoryPerformance = await prisma.$queryRaw`
-      SELECT 
-        q."categoryId",
-        count(*) as "_count__all",
-        count(CASE WHEN qa."isCorrect" = true THEN 1 END) as "_count_isCorrect"
-      FROM "QuestionAttempt" qa
-      JOIN "Question" q ON qa."questionId" = q.id
-      WHERE qa."quizAttemptId" = ${primaryAttempt.id}
-      GROUP BY q."categoryId"
-    `
+      // Service Performance
+      prisma.$queryRaw`
+        SELECT 
+          q."awsService",
+          COUNT(*) as "_count__all",
+          COUNT(CASE WHEN qa."isCorrect" = true THEN 1 END) as "_count_isCorrect",
+          AVG(CASE WHEN qa."isCorrect" = true THEN 1.0 ELSE 0.0 END) * 100 as "accuracyPercentage"
+        FROM "QuestionAttempt" qa
+        JOIN "Question" q ON qa."questionId" = q.id
+        WHERE qa."quizAttemptId" IN (${Prisma.join(quizAttempts.map(a => a.id))})
+        GROUP BY q."awsService"
+      `,
 
-    // Get service performance for the primary attempt
-    const servicePerformance = await prisma.$queryRaw`
-      SELECT 
-        q."awsService",
-        count(*) as "_count__all",
-        count(CASE WHEN qa."isCorrect" = true THEN 1 END) as "_count_isCorrect"
-      FROM "QuestionAttempt" qa
-      JOIN "Question" q ON qa."questionId" = q.id
-      WHERE qa."quizAttemptId" = ${primaryAttempt.id}
-      GROUP BY q."awsService"
-    `
+      // Difficulty Performance
+      prisma.$queryRaw`
+        SELECT 
+          q."difficultyLevel",
+          COUNT(*) as "_count__all",
+          COUNT(CASE WHEN qa."isCorrect" = true THEN 1 END) as "_count_isCorrect",
+          AVG(CASE WHEN qa."isCorrect" = true THEN 1.0 ELSE 0.0 END) * 100 as "accuracyPercentage"
+        FROM "QuestionAttempt" qa
+        JOIN "Question" q ON qa."questionId" = q.id
+        WHERE qa."quizAttemptId" IN (${Prisma.join(quizAttempts.map(a => a.id))})
+        GROUP BY q."difficultyLevel"
+      `
+    ])
 
-    // Get difficulty performance for the primary attempt
-    const difficultyPerformance = await prisma.$queryRaw`
-      SELECT 
-        q."difficultyLevel",
-        count(*) as "_count__all",
-        count(CASE WHEN qa."isCorrect" = true THEN 1 END) as "_count_isCorrect"
-      FROM "QuestionAttempt" qa
-      JOIN "Question" q ON qa."questionId" = q.id
-      WHERE qa."quizAttemptId" = ${primaryAttempt.id}
-      GROUP BY q."difficultyLevel"
-    `
-
-    // Calculate time metrics for the primary attempt
+    // Comprehensive time metrics
     const timeMetrics = {
-      totalTime: primaryAttempt.timeSpentSecs,
-      averageTimePerQuestion: primaryAttempt.questions.length > 0 
-        ? primaryAttempt.timeSpentSecs / primaryAttempt.questions.length 
-        : 0,
+      totalTime: quizAttempts.reduce((sum, attempt) => sum + attempt.timeSpentSecs, 0),
+      averageTimePerQuestion: quizAttempts.reduce((sum, attempt) => 
+        sum + (attempt.timeSpentSecs / attempt.questions.length), 0) / quizAttempts.length,
       timeByDifficulty: await prisma.$queryRaw`
         SELECT 
           q."difficultyLevel" as level,
           AVG(qa."timeSpentSecs") as "averageTime"
         FROM "QuestionAttempt" qa
         JOIN "Question" q ON qa."questionId" = q.id
-        WHERE qa."quizAttemptId" = ${primaryAttempt.id}
+        WHERE qa."quizAttemptId" IN (${Prisma.join(quizAttempts.map(a => a.id))})
         GROUP BY q."difficultyLevel"
       `
     }
 
-    // Return the data
+    // Performance trend calculation
+    const performanceTrend = quizAttempts.map(attempt => ({
+      testId: attempt.id,
+      testName: attempt.quiz.title,
+      score: attempt.percentageScore,
+      date: attempt.completedAt
+    })).reverse() // Oldest to newest
+
     return {
       success: true,
       data: {
-        quizAttempt: primaryAttempt,
-        categoryPerformance,
-        servicePerformance,
-        difficultyPerformance,
+        quizAttempts,
+        categoryPerformance: comprehensivePerformance[0],
+        servicePerformance: comprehensivePerformance[1],
+        difficultyPerformance: comprehensivePerformance[2],
         timeMetrics,
-        userHistory: quizAttempts // Now includes up to 5 recent attempts
+        performanceTrend
       }
     }
   } catch (error) {
-    console.error("Error getting user test data:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred"
-    }
+    console.error("Comprehensive test data retrieval error:", error)
+    return { success: false, error: "Failed to retrieve comprehensive test data" }
   }
 } 

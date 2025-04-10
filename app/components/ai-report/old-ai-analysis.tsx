@@ -69,49 +69,49 @@ function PremiumAIAnalysisDashboard(props: AIAnalysisProps) {
   const [report, setReport] = useState<AIReport | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function loadAnalysis() {
-      try {
-        setIsLoading(true)
-        setError(null)
-        
-        // Start progress animation
-        const progressInterval = setInterval(() => {
-          setProgress((prev) => {
-            if (prev >= 90) {
-              clearInterval(progressInterval)
-              return 90
-            }
-            return prev + 5
-          })
-        }, 500)
+  const loadAnalysis = async () => {
+    setIsLoading(true)
+    setError(null)
+    setProgress(0)
 
-        // Get AI analysis - pass quizAttemptId as optional
-        const result = await analyzeTestData(quizAttemptId)
-        
-        if (!result.success || !result.data) {
-          throw new Error(result.error || "Failed to analyze test data")
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressInterval)
+          return 90
         }
+        return prev + 5
+      })
+    }, 500)
 
-        // Log the AI-generated report to console for debugging
-        console.log("AI Analysis Report:", result.data)
+    try {
+      const result = await analyzeTestData()
+      clearInterval(progressInterval)
 
-        setReport(result.data)
-        setProgress(100)
-        
-        // Small delay to show 100% progress
-        setTimeout(() => {
-          setIsLoading(false)
-        }, 500)
-
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "An error occurred")
-        setIsLoading(false)
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Failed to analyze test data")
       }
-    }
+      
+      console.log("AI Analysis Report:", result.data)
 
+      setReport(result.data)
+      
+      setProgress(100)
+
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 500)
+    } catch (err) {
+      clearInterval(progressInterval)
+      setError(err instanceof Error ? err.message : "An error occurred")
+      setIsLoading(false)
+      setProgress(0)
+    }
+  }
+
+  useEffect(() => {
     loadAnalysis()
-  }, [quizAttemptId])
+  }, [])
 
   if (error) {
     return (

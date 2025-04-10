@@ -72,7 +72,15 @@ export default function PracticeTestsPage() {
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Practice Tests</h1>
+                <h1 className="text-2xl font-serif font-bold">Practice Tests</h1>
+                
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4 justify-between w-full">
+                <span className="flex space-x-3">
+                <SearchBar />
+                <FilterComponent />
+                </span>
                 <ToggleGroup
                   type="single"
                   value={view}
@@ -86,57 +94,11 @@ export default function PracticeTestsPage() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
-
-              <div className="flex flex-col md:flex-row gap-4">
-                <SearchBar />
-                <FilterComponent />
-              </div>
-
-              {tests.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedCategories.map((categoryId) => {
-                    const category = categories.find((c) => c.id === categoryId)
-                    return (
-                      <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
-                        {category?.label}
-                        <button
-                          className="ml-1 rounded-full hover:bg-muted p-0.5"
-                        >
-                          <Check className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    )
-                  })}
-
-                  {selectedLevel !== "all" && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      {levels.find((l) => l.id === selectedLevel)?.label}
-                      <button
-                        onClick={() => setSelectedLevel("all")}
-                        className="ml-1 rounded-full hover:bg-muted p-0.5"
-                      >
-                        <Check className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  )}
-
-                  {priceFilter !== "all" && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      {priceFilter === "free" ? "Free" : "Paid"}
-                      <button onClick={() => setPriceFilter("all")} className="ml-1 rounded-full hover:bg-muted p-0.5">
-                        <Check className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  )}
-                </div>
-              )}
+              
             </div>
 
-            <div className="mt-2">
-              <h2 className="text-lg font-medium mb-4">
-                {tests.length} {tests.length === 1 ? "Test" : "Tests"} Available
-              </h2>
 
+            <div className="mt-2">
               {view === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {tests.map((test) => (
