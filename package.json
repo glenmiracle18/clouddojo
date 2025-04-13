@@ -76,7 +76,6 @@
     "react-resizable-panels": "^2.1.7",
     "react-use": "latest",
     "recharts": "2.15.0",
-    "serverless": "4.12.0",
     "sonner": "^1.7.1",
     "svix": "^1.62.0",
     "tailwind-merge": "^2.5.5",
@@ -92,9 +91,6 @@
     "@types/react-dom": "^19.0.4",
     "postcss": "^8",
     "prisma": "^6.4.1",
-    "serverless-dotenv-plugin": "^6.0.0",
-    "serverless-offline": "^14.4.0",
-    "serverless-plugin-typescript": "^2.1.5",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
