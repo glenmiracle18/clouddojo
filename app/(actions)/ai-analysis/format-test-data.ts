@@ -191,7 +191,7 @@ const toNumber = (value: any): number => {
   return 0;
 };
 
-export function formatTestDataForAI(data: TestData): FormattedTestData {
+export const formatTestDataForAI = (data: TestData): FormattedTestData => {
   const {
     quizAttempts,
     categoryPerformance,
