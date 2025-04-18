@@ -36,7 +36,7 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
 
   // If no trigger is provided, just render the Dialog without a trigger
   const dialogContent = (
-    <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
+    <DialogContent className="md:max-w-2xl w-[90vw]  p-0 h-[90vh] overflow-auto rounded-lg">
       <DialogHeader className="px-6 pt-6 pb-4 bg-primary/5 dark:bg-primary/10">
         <DialogTitle className="text-2xl font-bold">Upgrade Your Plan</DialogTitle>
         <DialogDescription>
