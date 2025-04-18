@@ -1,6 +1,6 @@
 "use server"
 
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenerativeAI, GenerateContentResult } from "@google/generative-ai"
 import { formatDuration, intervalToDuration } from "date-fns"
 import { getUserTestData } from "./get-user-test-data"
 import type { TestData, FormattedTestData } from "./types"
@@ -28,7 +28,7 @@ const formatTestDataForAI = (data: TestData): FormattedTestData => {
   } = data
 
   // Ensure we have at least one attempt
-  if (quizAttempts.length === 0) {
+  if (!quizAttempts?.length) {
     throw new Error("No quiz attempts available for analysis")
   }
 
@@ -126,25 +126,23 @@ const formatTestDataForAI = (data: TestData): FormattedTestData => {
       : 0
   }))
 
-  // Question Details
-  const questionDetails = quizAttempts.flatMap(attempt => 
-    attempt.questions.map((q) => ({
-      id: q.questionId,
-      content: q.question.content,
-      category: q.question.category?.name || null,
-      service: q.question.awsService || null,
-      difficulty: q.question.difficultyLevel || "Unknown",
-      isCorrect: q.isCorrect,
-      timeSpent: {
-        seconds: q.timeSpentSecs,
-        formatted: formatDuration(
-          intervalToDuration({ start: 0, end: q.timeSpentSecs * 1000 })
-        )
-      },
-      userAnswer: q.userAnswer ? q.userAnswer.split(',') : [],
-      correctAnswer: q.question.correctAnswer || []
-    }))
-  )
+  // Question Details - Limit to most recent test only for performance
+  const questionDetails = primaryAttempt.questions.map((q) => ({
+    id: q.questionId,
+    content: q.question.content,
+    category: q.question.category?.name || null,
+    service: q.question.awsService || null,
+    difficulty: q.question.difficultyLevel || "Unknown",
+    isCorrect: q.isCorrect,
+    timeSpent: {
+      seconds: q.timeSpentSecs,
+      formatted: formatDuration(
+        intervalToDuration({ start: 0, end: q.timeSpentSecs * 1000 })
+      )
+    },
+    userAnswer: q.userAnswer ? q.userAnswer.split(',') : [],
+    correctAnswer: q.question.correctAnswer || []
+  }))
 
   return {
     user: userData,
@@ -160,33 +158,39 @@ const formatTestDataForAI = (data: TestData): FormattedTestData => {
 
 export async function analyzeTestData() {
   try {
-    // Get the API key from environment variables
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      throw new Error("Gemini API key not configured")
-    }
+    // Add timeout for the entire operation
+    const TIMEOUT = 25000; // 25 seconds
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
 
-    // Initialize the Gemini client
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",
-      generationConfig: {
-        temperature: 0.2,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 8192,
-      },
-    })
+    try {
+      // Get the API key from environment variables
+      const apiKey = process.env.GEMINI_API_KEY
+      if (!apiKey) {
+        throw new Error("Gemini API key not configured")
+      }
 
-    // Get and format test data
-    const testDataResult = await getUserTestData()
-    if (!testDataResult.success || !testDataResult.data) {
-      throw new Error(testDataResult.error || "Failed to fetch test data")
-    }
+      // Initialize the Gemini client with reduced tokens and temperature
+      const genAI = new GoogleGenerativeAI(apiKey)
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash-lite", // Updated model name
+        generationConfig: {
+          temperature: 0.1, // Reduced for faster, more focused responses
+          topP: 0.7,
+          topK: 20,
+          maxOutputTokens: 4096, // Reduced token count
+        },
+      })
 
-    // Convert the data to match the TestData interface
-    const testData: TestData = testDataResult.data as TestData
-    const formattedData = formatTestDataForAI(testData)
+      // Get and format test data
+      const testDataResult = await getUserTestData()
+      if (!testDataResult.success || !testDataResult.data) {
+        throw new Error(testDataResult.error || "Failed to fetch test data")
+      }
+
+      // Convert the data to match the TestData interface
+      const testData: TestData = testDataResult.data as TestData
+      const formattedData = formatTestDataForAI(testData)
 
     // Create the prompt for Gemini
     const prompt = `
@@ -266,49 +270,53 @@ ${JSON.stringify(formattedData, null, 2)}
 IMPORTANT: Return ONLY the JSON object conforming to the structure above. No additional text or explanations.
 `
 
-    // Generate content from Gemini
-    const result = await model.generateContent(prompt)
-    const response = result.response
-    const text = response.text()
+      // Generate content from Gemini with timeout
+      const result = await Promise.race([
+        model.generateContent(prompt),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("AI generation timeout")), 20000)
+        )
+      ]) as GenerateContentResult;
 
-    // Parse the response
-    try {
-      // Extract JSON from the response (handle markdown code blocks if present)
-      let jsonText = text;
-      
-      // Check if the response is wrapped in markdown code blocks
-      const jsonMatch = text.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) || 
-                        text.match(/```(?:json)?([\s\S]*?)```/);
-      
-      if (jsonMatch && jsonMatch[1]) {
-        jsonText = jsonMatch[1].trim();
+      const response = result.response;
+
+      try {
+        let jsonText = response.text();
+        const jsonMatch = jsonText.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) || 
+                         jsonText.match(/```(?:json)?([\s\S]*?)```/);
+        
+        if (jsonMatch && jsonMatch[1]) {
+          jsonText = jsonMatch[1].trim();
+        }
+        
+        const analysisReport = JSON.parse(jsonText);
+        
+        clearTimeout(timeoutId);
+        return {
+          success: true,
+          data: analysisReport
+        }
+      } catch (parseError) {
+        throw new Error("Failed to parse AI response");
       }
-      
-      const analysisReport = JSON.parse(jsonText);
-      
-      return {
-        success: true,
-        data: analysisReport
-      }
-    } catch (parseError) {
-      console.error("Failed to parse Gemini response as JSON:", parseError);
-      
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+  } catch (error: any) {
+    if (error?.name === 'AbortError' || error?.message?.includes('timeout')) {
       return {
         success: false,
-        error: "There was an error please try again later"
+        error: "Analysis took too long. Please try again."
       }
     }
-
-  } catch (error) {
+    
     console.error("Error analyzing test data:", error)
-    
-    if (error instanceof Error) {
-      console.error("Error stack:", error.stack)
-    }
-    
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred"
+      error: error instanceof Error 
+        ? error.message 
+        : "An unexpected error occurred"
     }
   }
 } 
