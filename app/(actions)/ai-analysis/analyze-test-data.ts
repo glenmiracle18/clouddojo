@@ -163,34 +163,34 @@ export async function analyzeTestData() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
 
-    try {
-      // Get the API key from environment variables
-      const apiKey = process.env.GEMINI_API_KEY
-      if (!apiKey) {
-        throw new Error("Gemini API key not configured")
-      }
+  try {
+    // Get the API key from environment variables
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      throw new Error("Gemini API key not configured")
+    }
 
       // Initialize the Gemini client with reduced tokens and temperature
-      const genAI = new GoogleGenerativeAI(apiKey)
-      const model = genAI.getGenerativeModel({
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({
         model: "gemini-2.0-flash-lite", // Updated model name
-        generationConfig: {
+      generationConfig: {
           temperature: 0.1, // Reduced for faster, more focused responses
           topP: 0.7,
           topK: 20,
           maxOutputTokens: 4096, // Reduced token count
-        },
-      })
+      },
+    })
 
-      // Get and format test data
-      const testDataResult = await getUserTestData()
-      if (!testDataResult.success || !testDataResult.data) {
-        throw new Error(testDataResult.error || "Failed to fetch test data")
-      }
+    // Get and format test data
+    const testDataResult = await getUserTestData()
+    if (!testDataResult.success || !testDataResult.data) {
+      throw new Error(testDataResult.error || "Failed to fetch test data")
+    }
 
-      // Convert the data to match the TestData interface
-      const testData: TestData = testDataResult.data as TestData
-      const formattedData = formatTestDataForAI(testData)
+    // Convert the data to match the TestData interface
+    const testData: TestData = testDataResult.data as TestData
+    const formattedData = formatTestDataForAI(testData)
 
     // Create the prompt for Gemini
     const prompt = `
@@ -284,19 +284,19 @@ IMPORTANT: Return ONLY the JSON object conforming to the structure above. No add
         let jsonText = response.text();
         const jsonMatch = jsonText.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) || 
                          jsonText.match(/```(?:json)?([\s\S]*?)```/);
-        
-        if (jsonMatch && jsonMatch[1]) {
-          jsonText = jsonMatch[1].trim();
-        }
-        
-        const analysisReport = JSON.parse(jsonText);
-        
+      
+      if (jsonMatch && jsonMatch[1]) {
+        jsonText = jsonMatch[1].trim();
+      }
+      
+      const analysisReport = JSON.parse(jsonText);
+      
         clearTimeout(timeoutId);
-        return {
-          success: true,
-          data: analysisReport
-        }
-      } catch (parseError) {
+      return {
+        success: true,
+        data: analysisReport
+      }
+    } catch (parseError) {
         throw new Error("Failed to parse AI response");
       }
     } finally {
@@ -310,7 +310,7 @@ IMPORTANT: Return ONLY the JSON object conforming to the structure above. No add
         error: "Analysis took too long. Please try again."
       }
     }
-    
+
     console.error("Error analyzing test data:", error)
     return {
       success: false,
