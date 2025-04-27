@@ -142,7 +142,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <span className="flex items-center gap-3">
                           {item.icon && (
                             <item.icon
-                              className="text-muted-foreground/60"
+                              className={isActive(item.url) ? "text-emerald-500" : "text-muted-foreground/60"}
                               size={22}
                               aria-hidden="true"
                             />
@@ -155,25 +155,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     ) : (
                       <SidebarMenuButton
                         asChild
-                        className={
-                          isActive(item.url)
-                            ? "group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-500/40 [&>svg]:size-auto flex flex-row"
-                            : "group/menu-button font-medium gap-3 h-9 rounded-md hover:bg-gradient-to-r hover:from-emerald-500 hover:to-emerald-500/40 flex flex-row"
-                        }
+                                              className="group/menu-button font-medium gap-3 h-9 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto"
                         isActive={isActive(item.url)}
                       >
                         <a href={item.url}>
                           {item.icon && (
                             <item.icon
-                              className={cn("text-muted-foreground/60", {
-                                "text-white": isActive(item.url),
-                              })}
+                              className="text-muted-foreground/60 group-data-[active=true]/menu-button:text-primary"
                               size={22}
                               aria-hidden="true"
                             />
                           )}
                           <span
-                            className={isActive(item.url) ? "text-white" : ""}
+                            className={isActive(item.url) ? "text-emerald-800" : ""}
                           >
                             {item.title}
                           </span>

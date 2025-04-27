@@ -47,10 +47,12 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {isSignedIn ? (
               <>
+              <div className="cursor-pointer">
+                <SignOutButton >Sign Out</SignOutButton>
+              </div>
               <Link href="/dashboard">
                 <NavbarButton variant="primary">Dashboard</NavbarButton>
               </Link>
-                <SignOutButton>Sign Out</SignOutButton>
               </>
             ) : (
               <SignInButton mode="modal">

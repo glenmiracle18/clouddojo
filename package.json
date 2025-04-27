@@ -19,6 +19,8 @@
     "@google/generative-ai": "^0.24.0",
     "@hookform/resolvers": "^3.9.1",
     "@motionone/react": "^10.16.4",
+    "@polar-sh/nextjs": "^0.4.0",
+    "@polar-sh/sdk": "^0.32.11",
     "@prisma/client": "^6.4.1",
     "@radix-ui/react-accordion": "^1.2.7",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -50,6 +52,7 @@
     "@remixicon/react": "^4.6.0",
     "@tabler/icons-react": "^3.31.0",
     "@tailwindcss/postcss": "^4.1.4",
+    "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.68.0",
     "@tanstack/react-query-devtools": "^5.68.0",
     "@workos-inc/authkit-nextjs": "^2.0.0",
@@ -78,6 +81,7 @@
     "react-day-picker": "^9.6.5",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.1",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.7",
     "react-use": "latest",
     "recharts": "2.15.0",
@@ -85,7 +89,7 @@
     "svix": "^1.62.0",
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2"
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.68.0",
