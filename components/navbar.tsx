@@ -1,110 +1,141 @@
 "use client"
-import Link from "next/link"
+
+import * as React from "react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { SignInButton, SignOutButton, useAuth } from "@clerk/nextjs"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
-  ResizableNavbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  NavbarButton,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/resizable-nav";
- 
-import React, { useRef, useState } from "react";
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
+import { ArrowRight, Search } from "lucide-react"
+import Link from "next/link"
+import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs"
 
+export default function Tabnavbar() {
+  const { isSignedIn } = useUser();
 
-export default function Navbar() {
-  const navItems = [
-    {
-      name: "Features",
-      link: "#features",
-    },
-    {
-      name: "Pricing",
-      link: "#pricing",
-    },
-    {
-      name: "Contact",
-      link: "#contact",
-    },
-  ];
-
-  const { isSignedIn } = useAuth();
-  
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
- return (
-  <div className="relative w-full">
-    <ResizableNavbar>
-        {/* Desktop Navigation */}
-        <NavBody>
-          <NavbarLogo />
-          <NavItems items={navItems} />
-          <div className="flex items-center gap-4">
-            {isSignedIn ? (
-              <>
-              <div className="cursor-pointer">
-                <SignOutButton >Sign Out</SignOutButton>
-              </div>
-              <Link href="/dashboard">
-                <NavbarButton variant="primary">Dashboard</NavbarButton>
-              </Link>
-              </>
-            ) : (
-              <SignInButton mode="modal">
-              Get Started
-            </SignInButton>
-            )}
-          </div>
-        </NavBody>
- 
-        {/* Mobile Navigation */}
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo />
-            <MobileNavToggle
-              isOpen={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+  return (
+    <nav className="">
+      <div className="container mx-auto flex items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
+        <div className="flex items-center space-x-4">
+          <Link href="#" className="text-2xl font-bold">
+            <img
+              src="/images/clouddojo-logo.png"
+              alt="logo"
+              width={50}
+              height={50}
             />
-          </MobileNavHeader>
- 
-          <MobileNavMenu
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-          >
-            {navItems.map((item, idx) => (
-              <a
-                key={`mobile-link-${idx}`}
-                href={item.link}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="relative text-neutral-600 dark:text-neutral-300"
-              >
-                <span className="block">{item.name}</span>
-              </a>
-            ))}
-            <div className="flex w-full flex-col gap-4">
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-              >
-                Login
-              </NavbarButton>
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-              >
-                Book a call
-              </NavbarButton>
+          </Link>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem className="bg-none text-black">
+                <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          href="#"
+                        >
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Featured Product
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Check out our latest and greatest offering
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    <ListItem href="#" title="Product 1">
+                      Description for Product 1
+                    </ListItem>
+                    <ListItem href="#" title="Product 2">
+                      Description for Product 2
+                    </ListItem>
+                    <ListItem href="#" title="Product 3">
+                      Description for Product 3
+                    </ListItem>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
+                  About
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
+                  Contact
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
+                  Blog
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
+                  Company
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+        <div className="flex items-center space-x-4">
+          {isSignedIn ? (
+            <div>
+              <SignOutButton />
+              <Link href="/dashboard">
+                <Button variant="outline" className="ml-4">
+                  Dashboard
+                </Button>
+              </Link>
             </div>
-          </MobileNavMenu>
-        </MobileNav>
-      </ResizableNavbar>
-  </div>
- )
+          ) : (
+            <div className="flex items-center space-x-4">
+              <SignInButton mode="modal" />
+              <Button className="bg-white hover:bg-gray-200">
+                <Link href="/contact" className="text-black">Contact Sales</Link>
+                <ArrowRight className="ml-2 h-4 w-4 text-black" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
 }
+
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"

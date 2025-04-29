@@ -11,7 +11,7 @@ import Footer from "@/components/footer"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white md:pt-20 pt-4 mx-auto">
+    <div className="min-h-screen bg-slate-950 text-white md:pt-8 pt-4 mx-auto">
 
       <Navbar />
       <main>
