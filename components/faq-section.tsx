@@ -1,33 +1,36 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function FaqSection() {
+
   const faqs = [
     {
-      question: "What is CloudPeak?",
+      question: "Can CloudDojo help me pass my AWS certification exam?",
       answer:
-        "CloudPeak is a comprehensive cloud certification platform designed to help professionals prepare for and pass their AWS certification exams with confidence.",
+        "Absolutely! CloudDojo is built to guide you step-by-step through your AWS exam prep using AI-driven quizzes, smart study tools, and up-to-date content tailored to exam objectives.",
     },
     {
-      question: "What services does CloudPeak offer?",
+      question: "Is CloudDojo really free?",
       answer:
-        "CloudPeak offers practice exams, personalized learning paths, AI-powered analysis, and expert guidance to help you prepare for your AWS certification exams.",
+        "Yes! CloudDojo is 100% free to use. You get access to high-quality cloud certification prep tools. There are some features that are behind a paywall, but you can totally get started for free., No extra subscriptions or hidden fees.",
     },
     {
-      question: "What are the main features of CloudPeak?",
+      question: "What makes CloudDojo different from other cloud certification platforms?",
       answer:
-        "CloudPeak features include realistic practice exams, detailed explanations, personalized learning paths, progress tracking, and AI-powered analysis to identify your strengths and weaknesses.",
+        "Unlike other platforms, CloudDojo uses AI to personalize your learning experience, highlight your weak areas, and help you focus on what actually matters to pass your exam faster.",
     },
     {
-      question: "How can CloudPeak help my business?",
+      question: "Do I need any experience to get started with CloudDojo?",
       answer:
-        "CloudPeak can help your business by providing a comprehensive training platform for your team, improving certification pass rates, and enhancing your team's cloud skills and knowledge.",
+        "Nope! Whether you're a beginner or already have some cloud knowledge, CloudDojo adapts to your level and helps you build the skills you need at your own pace.",
     },
     {
-      question: "Is CloudPeak suitable for businesses of all sizes?",
+      question: "What certifications can I prepare for with CloudDojo?",
       answer:
-        "Yes, CloudPeak is designed to meet the needs of individuals and businesses of all sizes, from startups to enterprise organizations.",
-    },
+        "Right now, CloudDojo focuses on helping you prepare for AWS certifications like the Cloud Practitioner and Solutions Architect Associate, with more coming soon!",
+    }
   ]
+
+
 
   return (
     <section className="container py-16">

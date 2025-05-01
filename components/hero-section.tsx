@@ -4,12 +4,15 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { Spotlight } from "./spotlight";
 import RotatingText from "./rotating-text";
+import { SignInButton, useUser } from "@clerk/nextjs";
 
 export default function HeroSection() {
+    const { isSignedIn } = useUser();
+  
   return (
-    <div className="relative mx-auto my-16 flex max-w-7xl flex-col items-center justify-center w-full overflow-hidden">
+    <div className="relative mx-auto md:my-16 my-8 flex max-w-7xl flex-col items-center justify-center w-full overflow-hidden">
       <div className="px-4 py-10 md:py-20">
-        <h1 className="relative z-10 mx-auto max-w-4xl text-center text-2xl font-bold text-white md:text-4xl lg:text-7xl dark:text-slate-300">
+        <h1 className="relative z-10 mx-auto max-w-4xl text-center text-3xl font-bold text-white md:text-4xl lg:text-7xl dark:text-slate-300">
           {"Study Smarter. Pass".split(" ").map((word, index) => (
             <motion.span
               key={index}
@@ -68,6 +71,7 @@ export default function HeroSection() {
           }}
           className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-4"
         >
+          {isSignedIn ? (
           <Link href="/dashboard">
             <button className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6  text-white inline-block">
               <span className="absolute inset-0 overflow-hidden rounded-full">
@@ -94,9 +98,39 @@ export default function HeroSection() {
               <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40"></span>
             </button>
           </Link>
+
+          ): (
+            
+            <div className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6  text-white inline-block">
+              <span className="absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"></span>
+              </span>
+              <div className="relative flex space-x-2 items-center z-10 rounded-full bg-zinc-950 py-2 px-6 ring-1 ring-white/10 ">
+                <SignInButton mode="modal" />
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M10.75 8.75L14.25 12L10.75 15.25"
+                  ></path>
+                </svg>
+              </div>
+              <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40"></span>
+            </div>
+          )}
+          <Link href="https://calendar.notion.so/meet/glenmiracle/7fnt4l09" target="_blank" rel="noopener noreferrer">
           <button className="w-auto transform rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
             Support
           </button>
+          </Link>
         </motion.div>
         <motion.div
           initial={{

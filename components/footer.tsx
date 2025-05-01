@@ -37,12 +37,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-emerald-500 transition-colors">
+                <Link href="/pricing" className="hover:text-emerald-500 transition-colors">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-emerald-500 transition-colors">
+                <Link href="https://calendar.notion.so/meet/glenmiracle/7fnt4l09" className="hover:text-emerald-500 transition-colors">
                   Contact Us
                 </Link>
               </li>
@@ -52,31 +52,27 @@ export default function Footer() {
 
         {/* Bottom section */}
         <div className="py-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-gray-400">Copyright © 2024 Forge. All Rights Reserved</div>
+          <div className="text-xs text-gray-400">Copyright © 2025 clouddojo.tech. All Rights Reserved</div>
 
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">
+            <Link href="/privacy" className="text-xs text-gray-400 hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">
-              Terms of Use
+            <Link href="tos" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Terms of Service
             </Link>
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Facebook className="h-5 w-5" />
-              <span className="sr-only">Facebook</span>
-            </Link>
-            <Link href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+            <Link href="#" className="text-emerald-600 hover:text-blue-400 transition-colors">
               <Instagram className="h-5 w-5" />
               <span className="sr-only">Instagram</span>
             </Link>
-            <Link href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+            <Link href="https://x.com/glen_miracle4?t=deOVIP9ZnYQg_znWKKqWFg&s=09" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-blue-400 transition-colors">
               <Twitter className="h-5 w-5" />
               <span className="sr-only">Twitter</span>
             </Link>
-            <Link href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+            <Link href="https://www.linkedin.com/in/glen-miracle-6968a9216/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-blue-400 transition-colors">
               <Linkedin className="h-5 w-5" />
               <span className="sr-only">LinkedIn</span>
             </Link>

@@ -110,9 +110,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden bg-sidebar-primary text-sidebar-primary-foreground">
             <img
-              src="/team-logo.webp"
-              width={36}
-              height={36}
+              src="/images/main-logo.png"
+              width={56}
+              height={56}
               alt="clouddojo logo"
             />
           </div>

@@ -14,12 +14,19 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { ArrowRight, Search } from "lucide-react"
+import { ArrowRight, Search, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function Tabnavbar() {
   const { isSignedIn } = useUser();
+  const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   return (
     <nav className="">
@@ -27,89 +34,145 @@ export default function Tabnavbar() {
         <div className="flex items-center space-x-4">
           <Link href="#" className="text-2xl font-bold">
             <img
-              src="/images/clouddojo-logo.png"
+              draggable="false"
+              src="/images/dojo-logo.png"
               alt="logo"
-              width={50}
-              height={50}
+              width={90}
+              height={90}
             />
           </Link>
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem className="bg-none text-black">
-                <NavigationMenuTrigger>Products</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                          href="#"
-                        >
-                          <div className="mb-2 mt-4 text-lg font-medium">
-                            Featured Product
-                          </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Check out our latest and greatest offering
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <ListItem href="#" title="Product 1">
-                      Description for Product 1
-                    </ListItem>
-                    <ListItem href="#" title="Product 2">
-                      Description for Product 2
-                    </ListItem>
-                    <ListItem href="#" title="Product 3">
-                      Description for Product 3
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
-                  About
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
-                  Contact
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
-                  Blog
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
-                  Company
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-        <div className="flex items-center space-x-4">
-          {isSignedIn ? (
-            <div>
-              <SignOutButton />
-              <Link href="/dashboard">
-                <Button variant="outline" className="ml-4">
-                  Dashboard
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-4">
-              <SignInButton mode="modal" />
-              <Button className="bg-white hover:bg-gray-200">
-                <Link href="/contact" className="text-black">Contact Sales</Link>
-                <ArrowRight className="ml-2 h-4 w-4 text-black" />
-              </Button>
-            </div>
+
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <NavigationMenu className="hidden md:flex">
+              <NavigationMenuList>
+                {/* <NavigationMenuItem className="bg-none text-black">
+                  <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                            href="#"
+                          >
+                            <div className="mb-2 mt-4 text-lg font-medium">
+                              Featured Product
+                            </div>
+                            <p className="text-sm leading-tight text-muted-foreground">
+                              Check out our latest and greatest offering
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <ListItem href="#" title="Product 1">
+                        User Progress Analytics
+                      </ListItem>
+                      <ListItem href="#" title="Product 2">
+                        Tailored Practice Tests
+                      </ListItem>
+                      <ListItem href="#" title="Product 3">
+                        AI-Powered Reports and Study Assistant 
+                      </ListItem>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem> */}
+                <NavigationMenuItem>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
+                    About
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} href="https://calendar.notion.so/meet/glenmiracle/7fnt4l09" target="_blank" rel="noopener noreferrer">
+                    Contact
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} href="#">
+                    Blog
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           )}
         </div>
+
+        {/* Mobile Menu Toggle */}
+        {isMobile && (
+          <button
+            onClick={toggleMenu}
+            className="p-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
+        )}
+
+        {/* Desktop Actions */}
+        {!isMobile && (
+          <div className="flex items-center space-x-4">
+            {isSignedIn ? (
+              <div>
+                <SignOutButton />
+                <Link href="/dashboard">
+                  <Button variant="outline" className="ml-4 text-black">
+                    Dashboard
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <SignInButton mode="modal" />
+                <Button className="bg-white hover:bg-gray-200">
+                  <Link href="https://calendar.notion.so/meet/glenmiracle/7fnt4l09" className="text-black" target="_blank" rel="noopener noreferrer">Contact Sales</Link>
+                  <ArrowRight className="ml-2 h-4 w-4 text-black" />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Mobile Menu */}
+      {isMobile && isMenuOpen && (
+        <div className="absolute z-50 inset-x-0 backdrop-blur-md bg-white/20 dark:bg-gray-900/70 shadow-lg p-4 border border-gray-200/20 dark:border-gray-700/20 rounded-b-lg">
+          <div className="container mx-auto flex flex-col space-y-4">
+            <Link href="#" className="block py-2 px-4 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md hover:text-black">
+              About
+            </Link>
+            <Link href="https://calendar.notion.so/meet/glenmiracle/7fnt4l09" className="block py-2 px-4 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md hover:text-black" target="_blank" rel="noopener noreferrer">
+              Contact
+            </Link>
+            <Link href="#" className="block py-2 px-4 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md hover:text-black">
+              Blog
+            </Link>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              {isSignedIn ? (
+                <div className="flex flex-col space-y-3 text-black">
+                  <SignOutButton />
+                  <Link href="/dashboard">
+                    <Button variant="outline" className="w-full text-black hover:text-black">
+                      Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-3">
+                  <SignInButton mode="modal" />
+                  <Button className="w-full bg-white hover:bg-gray-200">
+                    <Link href="https://calendar.notion.so/meet/glenmiracle/7fnt4l09" className="text-black" target="_blank" rel="noopener noreferrer">Contact Sales</Link>
+                    <ArrowRight className="ml-2 h-4 w-4 text-black" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

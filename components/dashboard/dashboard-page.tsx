@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
               <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
                 <SearchBar onSearch={(query) => console.log("Searching for:", query)} />
-                <FilterComponent />
+                {/* <FilterComponent /> */}
               </div>
             </div>
 

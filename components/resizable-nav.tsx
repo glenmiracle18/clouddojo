@@ -238,15 +238,15 @@ export const NavbarLogo = () => {
   return (
     <a
       href="#"
-      className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
+      className="relative z-20 mr-4 flex items-center justify-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
       <img
-        src="/images/clouddojo-logo.png"
+        src="/images/dojo-logo.png"
         alt="logo"
-        width={50}
-        height={50}
+        width={90}
+        height={90}
       />
-      <span className="font-medium text-xl text-white dark:text-white">CloudDojo</span>
+      {/* <span className="font-medium text-xl text-white dark:text-white">CloudDojo</span> */}
     </a>
   );
 };

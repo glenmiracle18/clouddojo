@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import * as seline from '@seline-analytics/web';
 
 export async function POST(req: Request) {
   // Get the headers
@@ -76,7 +77,8 @@ export async function POST(req: Request) {
           },
         });
       } else {
-        await prisma.user.create({
+        // Create new user
+        const newUser = await prisma.user.create({
           data: {
             userId: userId as string,
             email: email_addresses[0].email_address,
@@ -84,6 +86,41 @@ export async function POST(req: Request) {
             lastName: (last_name as string) || "",
           },
         });
+
+       
+
+        // TODO: Send a welcome email to the new user using resend.
+        
+        // Create a default free subscription for the new user
+        await prisma.payment.create({
+          data: {
+            userId: newUser.userId,
+            polarSubscriptionId: `free-${newUser.userId}`, // Placeholder ID for free tier
+            planTier: "FREE",
+            status: "ACTIVE",
+            amount: 0,
+            nextBillingDate: null, // Free tier doesn't have a billing date
+          },
+        });
+        
+        console.log(`Created free subscription for new user: ${newUser.userId}`);
+
+        // seline tracking
+        seline.track("user: signed up", {
+          userId: newUser.userId,
+          event: "user: signed up",
+          userEmail: newUser.email,
+          userName: `${newUser.firstName} ${newUser.lastName}`,
+          userPlan: "free",
+        });
+
+         // create seline user
+         seline.setUser({
+          userId: newUser.userId, // userId is a required field
+          plan: "free",
+          credits: 140,
+        });
+
       }
       console.log(`Received webhook with ID ${id} and event type of ${eventType}`)
       console.log('Webhook payload:', body)
@@ -96,4 +133,4 @@ export async function POST(req: Request) {
   }
 
   return new Response("Webhook received", { status: 200 });
-} 
+}
