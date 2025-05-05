@@ -310,8 +310,8 @@ function TestCard({ test, view, onStartTest }: TestCardProps) {
       <Card className="overflow-hidden transition-all hover:shadow-md group">
         <div className="aspect-video relative overflow-hidden">
           <img
-            src="/aws-bg-image.jpg"
-            alt={test.title}
+              src={ test.thumbnail ? test.thumbnail : "/aws-bg-image.jpg" }
+              alt={test.title}
             className="object-cover w-full h-full transition-transform group-hover:scale-105"
           />
           {test.free && (

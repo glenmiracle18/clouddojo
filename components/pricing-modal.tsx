@@ -57,15 +57,16 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
   const handleUpgrade = async (productId: string) => {
     if (!productId) return;
     
-    toast.loading("Redirecting to checkout...");
+    const toastId = toast.loading("Redirecting to checkout...");
     
     try {
       const response = await fetch(`/api/checkout?products=${productId}`);
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Checkout creation failed');
+        throw new Error(data.error || 'Checkout creation failed');
       }
       
-      const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -73,7 +74,9 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error("Failed to create checkout session");
+      toast.error("Failed to create checkout session. Please try again or contact support if the issue persists.", {
+        id: toastId
+      });
     }
   }
 
