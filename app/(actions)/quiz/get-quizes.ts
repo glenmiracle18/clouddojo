@@ -12,16 +12,23 @@ export async function GetPracticeTests(){
         }
 
         const tests = await prisma.quiz.findMany({
-            include: {
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                thumbnail: true,
+                isPublic: true,
+                duration: true,
+                free: true,
+                level: true,
+                category: true,
                 _count: {
                     select: {
                         questions: true
                     }
-                },
-                category: true,
+                }
             }
-        })
-
+        });
 
         console.log("Tests: ", tests);
         return {
@@ -29,11 +36,13 @@ export async function GetPracticeTests(){
             data: tests
         }
 
-
     } catch (error) {
         if (error instanceof Error) {
             console.log("Error: ", error.stack);
-          }
+        }
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An error occurred"
+        }
     }
-        
-    };
+}

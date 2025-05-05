@@ -6,12 +6,13 @@ import Link from "next/link"
 
 interface PracticeCardProps {
   title: string
+  thumbnail?: string
   questionCount: number
   status: "not-started" | "in-progress" | "completed"
   href: string
 }
 
-export function PracticeCard({ title, questionCount, status, href }: PracticeCardProps) {
+export function PracticeCard({ title, questionCount, status, thumbnail, href }: PracticeCardProps) {
   return (
     <Card className="overflow-hidden border-0 bg-transparent shadow-lg">
       <CardHeader className="relative p-0">
@@ -19,7 +20,7 @@ export function PracticeCard({ title, questionCount, status, href }: PracticeCar
           <div className="absolute inset-0 aws-card-bg opacity-80" />
           <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
           <div className="absolute bottom-4 left-4">
-            <Image src="/aws-logo.png" alt="AWS Logo" width={80} height={48} className="drop-shadow-lg" />
+            <Image src={ thumbnail ? thumbnail : "/aws-logo.png"} alt="AWS Logo" width={80} height={48} className="drop-shadow-lg" />
           </div>
         </div>
       </CardHeader>
@@ -48,6 +49,15 @@ export function PracticeCard({ title, questionCount, status, href }: PracticeCar
           >
             {status === "completed" ? "Completed" : status === "in-progress" ? "In Progress" : "Not Started"}
           </div>
+          {
+            status === "completed" ? (
+              <p className="text-sm text-gray-400">Score: 85%</p>
+            ) : status === "in-progress" ? (
+              <p className="text-sm text-gray-400">Time Left: 30:00</p>
+            ) : (
+              <p className="text-sm text-gray-400">Ready to start?</p>
+            )
+          }
           <Link href={href}>
             <Button variant="secondary" className="ml-2 bg-white/10 text-white hover:bg-white/20">
               Start Practice

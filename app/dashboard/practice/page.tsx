@@ -273,6 +273,7 @@ interface TestCardProps {
     id: string;
     title: string;
     description?: string | null;
+    thumbnail?: string | null;
     level?: DifficultyLevel | null;
     duration?: number | null;
     free?: boolean | null;
@@ -366,7 +367,7 @@ function TestCard({ test, view, onStartTest }: TestCardProps) {
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/4 lg:w-1/5 aspect-video md:aspect-square relative overflow-hidden">
             <img 
-              src="/aws-bg-image.jpg" 
+              src={ test.thumbnail ? test.thumbnail : "/aws-bg-image.jpg" }
               className="object-cover w-full h-full transition-transform group-hover:scale-105"
               alt={test.title}
             />

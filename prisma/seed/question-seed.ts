@@ -26,11 +26,10 @@ async function questionSeed() {
         // Create quiz in db
         const quiz = await prisma.quiz.create({
             data: {
-                title: "AWS Solutions Architect Practice Test",
-                description: "✅ This quiz consists of 19 questions, designed to assess your knowledge and skills in AWS Solutions Architect Associate certification. Get Ready!!",
-                isPublic: true, // Updated from isPublic
-                // price field removed if not in your updated schema
-                duration: 90,
+                title: "☄️ Quick Test",
+                description: "Get warmed up with this quick test, designed to prepare you for the AWS Solutions Architect Associate certification. It includes a variety of challenging questions to boost your skills and confidence.",
+                isPublic: true,
+                duration: 80,
                 free: true, 
             }
         });
@@ -40,7 +39,7 @@ async function questionSeed() {
         let defaultCategory;
         try {
             defaultCategory = await prisma.category.findFirst({
-                where: { name: "AWS Cloud Practioner" }
+                where: { name: "AWS Solutions Architect" }
             });
             
             if (!defaultCategory) {
