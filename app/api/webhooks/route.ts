@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import * as seline from '@seline-analytics/web';
+import { sendWelcomeEmail } from "@/lib/emails/send-email";
 
 export async function POST(req: Request) {
   // Get the headers
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
         await prisma.user.update({
           where: { userId: existingUser.userId },
           data: {
-            userId: userId as string, // Ensure userId is updated if found by email
+            userId: userId as string,
             email: email_addresses[0].email_address,
             firstName: (first_name as string) || "User",
             lastName: (last_name as string) || "",
@@ -87,10 +88,17 @@ export async function POST(req: Request) {
           },
         });
 
-       
+        // Send welcome email to the new user
+        try {
+          await sendWelcomeEmail({
+            email: newUser.email,
+            username: newUser.firstName,
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Don't fail the whole process if email fails
+        }
 
-        // TODO: Send a welcome email to the new user using resend.
-        
         // Create a default free subscription for the new user
         await prisma.payment.create({
           data: {

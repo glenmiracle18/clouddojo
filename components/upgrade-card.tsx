@@ -51,8 +51,8 @@ export default function UpgradeCard() {
         
         <UpgradeButton 
           className={cn(
-            "w-full bg-gradient-to-l from-emerald-500 to-emerald-800 hover:from-emerald-600 hover:to-emerald-800",
-            "text-emerald-800 font-medium",
+            "w-full bg-gradient-to-l rounded-full from-emerald-500 to-emerald-800 hover:from-emerald-600 hover:to-emerald-800",
+            "text-white font-medium",
             "transition-all duration-200 hover:shadow-md"
           )}
           label="Upgrade Now"

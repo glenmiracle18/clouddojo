@@ -2,14 +2,15 @@ import { ReactNode } from "react"
 
 // / Type definitions for the report data
 export interface ReportSummary {
-  score: number
+  testName: string
+  overallScore: number
   totalQuestions: number
   correctAnswers: number
   incorrectAnswers: number
+  skippedQuestions: number
   timeSpent: string
   testDate: string
   improvement: number
-  testName: string
 }
 
 export interface CategoryScore {
@@ -37,15 +38,36 @@ export interface MissedTopic {
 
 export interface ReportData {
   summary: ReportSummary
-  categoryScores: CategoryScore[]
+  categoryScores: Array<{
+    name: string
+    score: number
+    questions: number
+  }>
   strengths: string[]
   weaknesses: string[]
   recommendations: string[]
   detailedAnalysis: string
-  timeDistribution: TimeDistribution[]
-  performanceHistory: PerformanceHistory[]
+  timeDistribution: Array<{
+    category: string
+    time: number
+    count: number
+  }>
+  performanceHistory: Array<{
+    test: string
+    score: number
+  }>
   certificationReadiness: number
-  topMissedTopics: MissedTopic[]
+  topMissedTopics: Array<{
+    topic: string
+    count: number
+    importance: string
+  }>
+  studyPlan?: Array<{
+    title: string
+    description: string
+    resources: string[]
+    priority: "High" | "Medium" | "Low"
+  }>
 }
 
 // Type for expanded sections state

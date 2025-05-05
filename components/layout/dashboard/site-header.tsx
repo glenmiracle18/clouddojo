@@ -1,9 +1,11 @@
 "use client";
 
-import { SidebarIcon } from "lucide-react";
+import { Search, SidebarIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
+import * as React from "react";
 
 import { SearchForm } from "@/components/layout/dashboard/search-form";
+import { CommandMenu } from "@/components/layout/dashboard/command-menu";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,11 +20,15 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { UserButton, useUser } from "@clerk/nextjs";
 import FeedbackDialog from "./feedback-dialog";
+import { useFeedbackStore } from "@/store/use-feedback-store";
+import { useCommandMenuStore } from "@/store/use-command-menu-store";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
   const user = useUser();
   const pathname = usePathname();
+  const { isOpen: feedbackOpen, setIsOpen: setFeedbackOpen } = useFeedbackStore();
+  const { setIsOpen: setCommandMenuOpen } = useCommandMenuStore();
 
   // Generate breadcrumbs based on the current path
   const generateBreadcrumbs = () => {
@@ -74,6 +80,7 @@ export function SiteHeader() {
     );
   };
 
+
   return (
     <header className="flex sticky top-0 z-50 w-full items-center border-b bg-white/30 bg-opacity-50 backdrop-blur-sm">
       <div className="flex h-[--header-height] w-full items-center justify-between">
@@ -84,7 +91,7 @@ export function SiteHeader() {
             size="icon"
             onClick={toggleSidebar}
           >
-            <SidebarIcon />
+            <SidebarIcon className="h-24 w-24" />
           </Button>
           <Separator
             orientation="vertical"
@@ -95,7 +102,20 @@ export function SiteHeader() {
           </Breadcrumb>
         </div>
         <div className="gap-4 px-4 flex items-center mr-6">
-          <FeedbackDialog />
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+            onClick={() => setCommandMenuOpen(true)}
+          >
+            <Search className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline-flex">Quick traverse...</span>
+            <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <span className="text-xs">⌘</span>J
+            </kbd>
+          </Button>
+          <CommandMenu />
+          <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
           {user.isLoaded && (
             <div suppressHydrationWarning>
               <UserButton afterSignOutUrl="/" />

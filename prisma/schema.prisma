@@ -209,9 +209,11 @@ model AIAnalysisReport {
   generatedAt     DateTime @default(now())
   expiresAt       DateTime
   lastRequestedAt DateTime @default(now())
+  latest          Boolean  @default(true)
   user            User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@index([userId])
+  @@unique([userId, latest], name: "userId_latest")
 }
 
 enum DifficultyLevel {

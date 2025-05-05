@@ -21,6 +21,24 @@ interface PricingModalProps {
   onOpenChange?: (open: boolean) => void
 }
 
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  benefits: Benefit[];
+  prices: Price[];
+}
+
+interface Benefit {
+  id: string;
+  description: string;
+}
+
+interface Price {
+  amountType: string;
+  priceAmount: number;
+}
+
 export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingModalProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   
@@ -36,16 +54,27 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
     }
   })
 
-  const handleUpgrade = (productId: string) => {
-    if (!productId) return
+  const handleUpgrade = async (productId: string) => {
+    if (!productId) return;
     
-    toast.loading("Redirecting to checkout...")
+    toast.loading("Redirecting to checkout...");
     
-    // Directly navigate to the checkout route
-    // This will trigger the route.ts handler which creates and redirects to the Polar checkout
-    window.location.href = `/checkout?products=${productId}`
-    toast.success("Preparing checkout...")
-
+    try {
+      const response = await fetch(`/api/checkout?products=${productId}`);
+      if (!response.ok) {
+        throw new Error('Checkout creation failed');
+      }
+      
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error("Failed to create checkout session");
+    }
   }
 
   return (
@@ -77,7 +106,13 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
           </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {pricingPlans?.items.map((product) => {
+              {pricingPlans?.items
+                .sort((a: Product, b: Product) => {
+                  const aIsPremium = a.name.toLowerCase().includes("premium");
+                  const bIsPremium = b.name.toLowerCase().includes("premium");
+                  return aIsPremium ? 1 : bIsPremium ? -1 : 0;
+                })
+                .map((product: Product) => {
                 const isPremium = product.name.toLowerCase().includes("premium")
 
                 return (
@@ -104,7 +139,7 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
                       </div>
 
                       <div className="space-y-3 text-gray-700 text-sm">
-                        {product.benefits.map((benefit) => (
+                        {product.benefits.map((benefit: Benefit) => (
                           <div key={benefit.id} className="flex items-center gap-2">
                             <CheckIcon className="h-5 w-5 text-green-500" />
                             <span>{benefit.description}</span>

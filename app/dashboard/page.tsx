@@ -16,6 +16,7 @@ import { Zap } from "lucide-react";
 import PremiumAnalysisDashboard from "@/components/ai-report/premium-ai-analysis";
 import { CheckUser } from "@/app/(actions)/user/check-user";
 import React from "react";
+import Image from "next/image";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -23,7 +24,7 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState(0);
   
   // Check if user profile exists
-  const { data: userProfile, isLoading: isCheckingProfile } = useQuery({
+  const { data: userProfile, isLoading: isCheckingProfile, isError: isProfileError } = useQuery({
     queryKey: ["checkUserProfile"],
     queryFn: () => CheckUser(),
     enabled: isLoaded && !!user,
@@ -36,7 +37,7 @@ export default function DashboardPage() {
     if (userProfile?.exists === false) {
       router.push("/dashboard/profile");
     }
-  }, [userProfile, isLoaded, isCheckingProfile, router]);
+  }, [userProfile, isCheckingProfile, isLoaded, router]);
 
   const {
     performanceStats,
@@ -70,51 +71,18 @@ export default function DashboardPage() {
   }, [isLoadingPerformance, isLoadingActivity, isLoadingCategories]);
 
   // Show loading state while checking profile
-  if (isCheckingProfile) {
-    return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-        <div className="w-64 mb-8">
-          <svg viewBox="0 0 100 100" className="animate-pulse-subtle">
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              stroke="#10b981"
-              strokeWidth="8"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray="251.2"
-              strokeDashoffset="125.6"
-              className="animate-dash"
-            />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Checking Profile Status</h2>
-        <p className="text-gray-600 mb-6">Just a moment...</p>
-      </div>
-    );
+  if (isProfileError) {
+    console.log("Unauthorized access")
+    router.replace("/")
   }
 
   if (isLoadingPerformance || isLoadingActivity || isLoadingCategories) {
     return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-        <div className="w-64 mb-8">
-          <svg viewBox="0 0 100 100" className="animate-pulse-subtle">
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              stroke="#10b981"
-              strokeWidth="8"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray="251.2"
-              strokeDashoffset="125.6"
-              className="animate-dash"
-            />
-          </svg>
+      <div className="fixed inset-0 min-h-screen w-full bg-white flex flex-col items-center justify-center">
+        <div className="w-96 mb-8 animate-pulse flex items-center justify-center">
+          <Image src="/images/main-logo.png" alt="dojo-logo" className="w-32 h-32" width={160} height={160} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Analyzing Your AWS Test Results</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Preparing your dashboard data</h2>
         <p className="text-gray-600 mb-6">Processing all your data in one place</p>
         <div className="w-80">
           <Progress value={progress} className="h-2" />
@@ -163,9 +131,7 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="report">
-          <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
             <PremiumAnalysisDashboard />
-          </main>
         </TabsContent>
       </Tabs>
     </div>

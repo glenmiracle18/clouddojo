@@ -33,7 +33,7 @@ export default function FaqSection() {
 
 
   return (
-    <section className="container py-16">
+    <section className="py-16">
       <h2 className="text-3xl font-bold mb-12 text-center flex items-center justify-center">Frequently Asked Questions</h2>
 
       <div className="max-w-3xl mx-auto">
