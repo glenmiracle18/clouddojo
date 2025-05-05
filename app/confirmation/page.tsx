@@ -1,10 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/polar";
 
-export default function ConfirmationPage() {
+function CheckoutStatus() {
 	const searchParams = useSearchParams();
 	const checkoutId = searchParams.get("checkout_id");
 	const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -61,5 +61,20 @@ export default function ConfirmationPage() {
 				<a href="/" className="text-blue-600 hover:underline">Return to homepage</a>
 			</div>
 		</div>
+	);
+}
+
+export default function ConfirmationPage() {
+	return (
+		<Suspense fallback={
+			<div className="flex min-h-screen items-center justify-center">
+				<div className="text-center">
+					<h1 className="text-2xl font-bold mb-4">Loading...</h1>
+					<p className="text-gray-600">Please wait...</p>
+				</div>
+			</div>
+		}>
+			<CheckoutStatus />
+		</Suspense>
 	);
 }
