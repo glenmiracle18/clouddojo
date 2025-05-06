@@ -21,7 +21,7 @@ export default function OnboardingLayout({
       <div className="hidden md:flex md:w-1/4 border-r p-6 lg:p-8 flex-col md:justify-center md:items-center">
 
       <div className="flex items-center space-x-2 m-3 mb-20">
-        <Image src="/team-logo.webp" alt="Cloud Dojo" width={70} height={70} className="rounded-full" />
+        <Image src="/images/dojo-logo.png" alt="Cloud Dojo" width={80} height={80} className="" />
         <h1 className="text-2xl font-bold font-serif">Cloud Dojo</h1>
       </div>
         <div className="mb-8">

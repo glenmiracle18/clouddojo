@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-
   transpilePackages: ['react-element-to-jsx-string'],
   eslint: {
     ignoreDuringBuilds: true,
@@ -17,7 +16,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com", 
         pathname: "/*",
-      },
+      }
     ],
   },
   typescript: {

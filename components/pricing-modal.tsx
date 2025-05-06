@@ -60,21 +60,28 @@ export default function PricingModal({ trigger, isOpen, onOpenChange }: PricingM
     const toastId = toast.loading("Redirecting to checkout...");
     
     try {
-      const response = await fetch(`/api/checkout?products=${productId}`);
-      const data = await response.json();
+      const response = await fetch(`/api/checkout?products=${productId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
       
       if (!response.ok) {
-        throw new Error(data.error || 'Checkout creation failed');
+        const error = await response.text();
+        throw new Error(error || 'Failed to create checkout session');
       }
       
+      const data = await response.json();
+      
       if (data.url) {
-        window.location.href = data.url;
+        window.location.assign(data.url);
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error("Failed to create checkout session. Please try again or contact support if the issue persists.", {
+      toast.error("Failed to create checkout session. Please try again.", {
         id: toastId
       });
     }
