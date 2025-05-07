@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { MoreVertical } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useSubscription } from "@/hooks/use-subscription"
 
 interface PracticeCardProps {
   title: string
@@ -12,6 +13,8 @@ interface PracticeCardProps {
   href: string
 }
 
+  const { isPro, isPremium, planName, isLoading, isError } = useSubscription();
+  
 export function PracticeCard({ title, questionCount, status, thumbnail, href }: PracticeCardProps) {
   return (
     <Card className="overflow-hidden border-0 bg-transparent shadow-lg">
@@ -41,7 +44,7 @@ export function PracticeCard({ title, questionCount, status, thumbnail, href }: 
             className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
               ${
                 status === "completed"
-                  ? "bg-green-500/20 text-green-400"
+                  ? "bg-emerald-500/20 text-emerald-400"
                   : status === "in-progress"
                     ? "bg-yellow-500/20 text-yellow-400"
                     : "bg-blue-500/20 text-blue-400"

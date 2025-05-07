@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils"
 import PracticeTestsSkeleton from "./components/PracticeTestsSkeleton"
 import UpgradeButton from "@/components/upgrade-button"
 import { useRouter } from "next/navigation"
+import { useSubscription } from "@/hooks/use-subscription"
 
 export default function PracticeTestsPage() {
   const router = useRouter()
@@ -41,6 +42,8 @@ export default function PracticeTestsPage() {
     }
     return "grid"
   })
+
+  
 
   // Check for ongoing test
   const hasOngoingTest = useMemo(() => {
@@ -290,6 +293,11 @@ interface TestCardProps {
 }
 
 function TestCard({ test, view, onStartTest }: TestCardProps) {
+  const { isPro, isPremium, planName, isLoading: planLoading, isError: planError } = useSubscription();
+
+// check if the user has a Pro or Premium plan or even if the test if free in the firs place
+  const hasAccess  = test.free || isPro || isPremium
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case "BEGINER":
@@ -314,8 +322,11 @@ function TestCard({ test, view, onStartTest }: TestCardProps) {
               alt={test.title}
             className="object-cover w-full h-full transition-transform group-hover:scale-105"
           />
-          {test.free && (
+          {hasAccess ? (
             <Badge className="absolute top-2 right-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Free</Badge>
+          ): (
+            <Badge className="absolute top-2 right-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Upgrade</Badge>
+
           )}
         </div>
         <CardHeader className="p-4 pb-0">
@@ -341,14 +352,13 @@ function TestCard({ test, view, onStartTest }: TestCardProps) {
             </div>
           </div>
         </CardContent>
-        {test.free ? (
+        {hasAccess ? (
           <CardFooter className="p-4 pt-0 w-full flex items-end justify-end">
             <Button 
               onClick={onStartTest}
               className={buttonVariants({ 
                 variant: "default", 
-                size: "sm",
-                className: "bg-green-600 hover:bg-green-700 transition-colors"
+                className: "bg-emerald-500 hover:bg-emerald-600 transition-colors"
               })}
             >
               Start Test
@@ -371,7 +381,7 @@ function TestCard({ test, view, onStartTest }: TestCardProps) {
               className="object-cover w-full h-full transition-transform group-hover:scale-105"
               alt={test.title}
             />
-            {test.free && (
+            {hasAccess && (
               <Badge className="absolute top-2 right-2 bg-emerald-500 hover:bg-emerald-600">Free</Badge>
             )}
           </div>
@@ -385,13 +395,13 @@ function TestCard({ test, view, onStartTest }: TestCardProps) {
                 )}
                 <h3 className="font-semibold text-lg">{test.title}</h3>
               </div>
-              {test.free ? (
+                {hasAccess ? (
                 <Button 
                   onClick={onStartTest}
                   className={buttonVariants({ 
                     variant: "default", 
                     size: "sm",
-                    className: "bg-green-600 hover:bg-green-700 transition-colors"
+                    className: "bg-emerald-600 hover:bg-emerald-700 transition-colors"
                   })}
                 >
                   Start Test

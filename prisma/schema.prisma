@@ -16,36 +16,10 @@ model User {
   updatedAt              DateTime           @updatedAt
   hasCompletedOnboarding Boolean            @default(false)
   aiAnalysisReports      AIAnalysisReport[]
-  purchases              Purchase[]
   quizAttempts           QuizAttempt[]
   onboarding             UserOnboarding?
   progress               UserProgress[]
-  subscriptions          Payment[]          // Added relation to Payment model
-}
-
-// New Payment model for subscription tracking
-model Payment {
-  id                String          @id @default(uuid())
-  userId            String
-  polarSubscriptionId String        @unique // ID from polar.sh
-  planTier          SubscriptionTier
-  status            SubscriptionStatus @default(ACTIVE)
-  hasUpgraded       Boolean         @default(false)
-  startDate         DateTime        @default(now())
-  endDate           DateTime?
-  lastBillingDate   DateTime        @default(now())
-  nextBillingDate   DateTime?
-  amount            Float
-  currency          String          @default("USD")
-  paymentMethod     String?
-  canceledAt        DateTime?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  user              User            @relation(fields: [userId], references: [userId], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
-  @@index([planTier])
+  Subscriptions   LsUserSubscription[]
 }
 
 // New enums for subscription tiers and status
@@ -137,32 +111,60 @@ model UserProgress {
   user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
-model Plan {
-  id                 Int     @id @default(autoincrement())
+model LsSubscriptionPlan {
+  id                 String               @id @default(cuid())
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   productId          Int
-  productName        String?
-  variantId          Int     @unique
+  productName        String
+  variantId          Int                  @unique
   name               String
   description        String?
   price              String
-  isUsageBased       Boolean @default(false)
+  isUsageBased       Boolean              @default(false)
   interval           String?
   intervalCount      Int?
   trialInterval      String?
   trialIntervalCount Int?
   sort               Int?
+  Subscriptions      LsUserSubscription[]
+}
 
-  @@map("plan") // maps to the "plan" table in your database
+model LsWebhookEvent {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  eventName       String
+  processed       Boolean  @default(false)
+  body            Json
+  processingError String?
+}
+
+// Lemon Squeezy Subscription 
+model LsUserSubscription {
+  id                 String             @id @default(cuid())
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  lemonSqueezyId     String             @unique
+  orderId            Int
+  name               String
+  email              String
+  status             String
+  statusFormatted    String
+  renewsAt           String?
+  endsAt             String?
+  trialEndsAt        String?
+  price              String
+  isUsageBased       Boolean            @default(false)
+  isPaused           Boolean            @default(false)
+  subscriptionItemId String?
+  userId             String
+  User               User               @relation(fields: [userId], references: [userId])
+  planId             String
+  SubscriptionPlan   LsSubscriptionPlan @relation(fields: [planId], references: [id])
 }
 
 
-model Purchase {
-  id          String   @id @default(uuid())
-  userId      String
-  purchasedAt DateTime @default(now())
-  price       Float
-  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-}
+
 
 model Category {
   id          String        @id @default(uuid())

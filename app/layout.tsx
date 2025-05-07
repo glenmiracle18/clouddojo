@@ -35,9 +35,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark:dark">
       <head>
-        <Script async src="https://cdn.seline.com/seline.js" data-token="9b13f9d446740a0"></Script>
       </head>
       <body className={`${inter.className} dark:bg-gray-900`}>
+        <Script src="https://app.lemonsqueezy.com/js/lemon.js" strategy="beforeInteractive" defer />
+        <Script async src="https://cdn.seline.com/seline.js" data-token="9b13f9d446740a0"></Script>
         <Providers>
           <Spotlight
             className="-top-40 left-0 md:-top-20 md:left-60"
