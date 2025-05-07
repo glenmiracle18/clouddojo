@@ -99,18 +99,7 @@ export async function POST(req: Request) {
           // Don't fail the whole process if email fails
         }
 
-        // Create a default free subscription for the new user
-        await prisma.payment.create({
-          data: {
-            userId: newUser.userId,
-            polarSubscriptionId: `free-${newUser.userId}`, // Placeholder ID for free tier
-            planTier: "FREE",
-            status: "ACTIVE",
-            amount: 0,
-            nextBillingDate: null, // Free tier doesn't have a billing date
-          },
-        });
-        
+      
         console.log(`Created free subscription for new user: ${newUser.userId}`);
 
         // seline tracking
