@@ -8,10 +8,10 @@ import {
   motion,
   AnimatePresence,
   useScroll,
-  useMotionValueEvent,
 } from "motion/react";
+import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
  
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -61,13 +61,24 @@ export function ResizableNavbar({children, className}: {children: React.ReactNod
   });
   const [visible, setVisible] = useState<boolean>(false);
  
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest > 100) {
-      setVisible(true);
-    } else {
-      setVisible(false);
-    }
-  });
+  // Replace useMotionValueEvent with useIsomorphicLayoutEffect
+  useIsomorphicLayoutEffect(() => {
+    if (!scrollY) return;
+    
+    const updateVisibility = () => {
+      const latest = scrollY.get();
+      if (latest > 100) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    };
+    
+    const unsubscribe = scrollY.on("change", updateVisibility);
+    updateVisibility(); // Initial check
+    
+    return () => unsubscribe();
+  }, [scrollY]);
   
   return (
     <motion.div

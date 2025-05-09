@@ -42,11 +42,20 @@ export const getCurrentUserProfile = async () => {
         }
     })
 
-    const userPlan = await prisma.lsSubscriptionPlan.findFirst({
-        where: {
-            id: user?.Subscriptions[0]?.planId
-        }
+    const userPlan = await prisma.lsUserSubscription.findFirst({
+      where: {
+        userId: clerkUserId
+      },
+      include: {
+        SubscriptionPlan: true
+      }
     })
+
+    console.log('current userSubs', userPlan)
+
+
+
+
 
     
     
@@ -55,6 +64,7 @@ export const getCurrentUserProfile = async () => {
       return redirectToSignIn();
     }
     
+
     return {user, userPlan}
   } catch (error) {
     console.error('Error fetching user profile:', error);

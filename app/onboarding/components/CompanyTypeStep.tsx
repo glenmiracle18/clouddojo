@@ -7,11 +7,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 
 const companyTypes = [
+  { value: "Individual", label: "Individual", description: "Independent user or freelancer" },
   { value: "Startup", label: "Startup", description: "Early-stage company with high growth potential" },
   { value: "SMB", label: "Small/Medium Business", description: "Established business with less than 500 employees" },
   { value: "Enterprise", label: "Enterprise", description: "Large organization with complex infrastructure" },
   { value: "Educational", label: "Educational", description: "School, university or other educational institution" },
-  { value: "Non-profit", label: "Non-profit", description: "Charitable or community organization" }
 ]
 
 export default function CompanyTypeStep() {
@@ -46,7 +46,11 @@ export default function CompanyTypeStep() {
         {companyTypes.map((type) => (
           <div 
             key={type.value}
-            className="flex items-center space-x-2 rounded-lg border p-4 cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10 transition-colors"
+            className={`flex items-center space-x-2 rounded-lg border p-4 cursor-pointer transition-colors ${
+              companyType === type.value 
+                ? "bg-emerald-400/10 border-emerald-400" 
+                : "hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10"
+            }`}
             onClick={() => handleTypeChange(type.value)}
           >
             <RadioGroupItem value={type.value} id={type.value} />
@@ -66,7 +70,7 @@ export default function CompanyTypeStep() {
         <Button 
           onClick={handleContinue}
           disabled={!companyType}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          className="bg-emerald-600 hover:bg-emerald-700 rounded-full"
         >
           Continue
         </Button>

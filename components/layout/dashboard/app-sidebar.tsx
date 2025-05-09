@@ -91,6 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   // Use our custom subscription hook
   const { isPro, isPremium, planName, isLoading, isError } = useSubscription();
+  console.log(planName)
 
   // Helper function to check if a URL is active
   const isActive = (url: string): boolean => url === pathname;
@@ -142,7 +143,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {planName && (
             <SubscriptionCard plan={planName} variant="glass" />
 
-        )}π
+        )}
         {!isLoading && !isError && !isPro && !isPremium && (
           <div className="px-4 mb-4">
             <UpgradeCard />

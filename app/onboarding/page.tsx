@@ -5,11 +5,11 @@ import { useUser, useAuth } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { OnboardingProvider, useOnboarding } from "./components/OnboardingContext"
 import OnboardingLayout from "./components/OnboardingLayout"
-import CompanyTypeStep from "./components/CompanyTypeStep"
 import CompanySizeStep from "./components/CompanySizeStep"
 import GoalsStep from "./components/GoalsStep"
 import FinalStep from "./components/FinalStep"
 import { useOnboardingQueries } from "./hooks/useOnboardingQueries"
+import CompanyTypeStep from "./components/CompanyTypeStep"
 
 function OnboardingContent() {
   const { currentStep, totalSteps } = useOnboarding()

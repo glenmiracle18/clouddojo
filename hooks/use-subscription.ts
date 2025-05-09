@@ -49,7 +49,7 @@ export function useSubscription(): SubscriptionStatus {
   // Memoize the subscription status to avoid unnecessary recalculations
   const subscriptionStatus = useMemo(() => {
     // Check if userData exists and has the right structure
-    if (!userData || typeof userData !== 'object' || !('userPlan' in userData)) {
+    if (!userData?.userPlan || typeof userData !== 'object' || !('userPlan' in userData)) {
       return {
         isPro: false,
         isPremium: false,
@@ -59,7 +59,8 @@ export function useSubscription(): SubscriptionStatus {
     }
 
     // Get the plan name from the userPlan object
-    const planName = userData.userPlan?.name || null;
+    const planName = userData.userPlan?.SubscriptionPlan?.name || null;
+
     
     if (!planName) {
       return {

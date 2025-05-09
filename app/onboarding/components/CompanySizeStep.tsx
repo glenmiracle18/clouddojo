@@ -5,6 +5,7 @@ import { useOnboarding } from "./OnboardingContext"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { ArrowLeft } from "lucide-react"
 
 const companySizes = [
   { value: "1-10", label: "1-10 employees", description: "Small team or startup" },
@@ -40,7 +41,11 @@ export default function CompanySizeStep() {
         {companySizes.map((size) => (
           <div 
             key={size.value}
-            className="flex items-center space-x-2 rounded-lg border p-4 cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10 transition-colors"
+            className={`flex items-center space-x-2 rounded-lg border p-4 cursor-pointer transition-colors ${
+              companySize === size.value 
+                ? "bg-emerald-400/10 border-emerald-400" 
+                : "hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10"
+            }`}
             onClick={() => handleSizeChange(size.value)}
           >
             <RadioGroupItem value={size.value} id={size.value} />
@@ -58,19 +63,21 @@ export default function CompanySizeStep() {
       
       <div className="pt-4 flex justify-between">
         <Button
-          variant="outline"
+          variant="link"
           onClick={goToPreviousStep}
+          className="rounded-full text-emerald-600 "
         >
+          <ArrowLeft className="mr-2" />
           Back
         </Button>
         <Button 
           onClick={goToNextStep}
           disabled={!companySize}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          className="bg-emerald-600 hover:bg-emerald-700 rounded-full"
         >
           Continue
         </Button>
       </div>
     </div>
   )
-} 
+}

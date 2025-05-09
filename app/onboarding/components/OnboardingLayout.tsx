@@ -15,33 +15,36 @@ export default function OnboardingLayout({
   totalSteps,
 }: OnboardingLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background w-full bg-white">
       {/* Left sidebar with stepper */}
-      
-      <div className="hidden md:flex md:w-1/4 border-r p-6 lg:p-8 flex-col md:justify-center md:items-center">
 
-      <div className="flex items-center space-x-2 m-3 mb-20">
-        <Image src="/images/dojo-logo.png" alt="Cloud Dojo" width={80} height={80} className="" />
-        <h1 className="text-2xl font-bold font-serif">Cloud Dojo</h1>
-      </div>
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">
-            Set up your account
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Complete these steps to get started
-          </p>
+      <div className="hidden w-80 flex-col border-r border-gray-100 bg-gray-50 p-6 lg:flex">
+
+        <div className="mb-12 flex justify-center items-center space-x-2">
+          <Image src="/images/dojo-logo.png" alt="Cloud Dojo" width={130} height={130} className="" />
         </div>
-        
+
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-emerald-900">Set up your account</h2>
+          <p className="text-sm text-gray-500">Complete these steps to get started</p>
+        </div>
+
         <OnboardingStepper />
       </div>
-      
+
       {/* Content area */}
       <div className="flex-1 flex flex-col md:w-3/4">
         <main className="flex-1 flex items-center justify-center p-4 md:p-8">
           <div className="w-full max-w-3xl mx-auto">
             {/* Mobile stepper - only show progress bar */}
             <div className="mb-8 md:hidden">
+              <div className="flex items-center justify-center mb-2">
+
+            <Image src="/images/dojo-logo.png" alt="Cloud Dojo" width={130} height={130} className="" />
+            <h2 className="text-xl font-semibold text-emerald-600">Onboarding...</h2>
+
+              </div>
+
               <div className="flex justify-between items-center mb-2">
                 <h1 className="text-xl font-bold">
                   Step {currentStep} of {totalSteps}
@@ -57,9 +60,9 @@ export default function OnboardingLayout({
                 />
               </div>
             </div>
-            
+
             {/* Current step content */}
-            <div className="bg-card border rounded-lg shadow-sm p-6">
+            <div className="bg-card px-8 rounded-lg shadow-sm p-6">
               {children}
             </div>
           </div>

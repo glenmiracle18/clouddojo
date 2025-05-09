@@ -9,7 +9,6 @@ import {
   List,
 } from "lucide-react"
 
-import { practiceTests, categories, levels, type PracticeTest } from "@/public/data/test-data"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
