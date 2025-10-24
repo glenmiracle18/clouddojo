@@ -31,6 +31,16 @@ interface DocumentationModalProps {
   children: React.ReactNode;
 }
 
+/**
+ * Renders a dialog that fetches and exposes generated project documentation for viewing, downloading, copying, and sharing.
+ *
+ * Fetching occurs when the dialog is opened. The modal shows a loading state, project metadata, action buttons
+ * (download Markdown, copy to clipboard, share on LinkedIn, open in new tab), and a scrollable Markdown preview.
+ *
+ * @param projectId - The project identifier used to fetch documentation from the API.
+ * @param children - Trigger element(s) rendered as the dialog trigger; interacting with this content opens the modal.
+ * @returns The modal dialog JSX containing the documentation UI.
+ */
 export function DocumentationModal({ projectId, children }: DocumentationModalProps) {
   const { getToken } = useAuth();
   const [open, setOpen] = useState(false);

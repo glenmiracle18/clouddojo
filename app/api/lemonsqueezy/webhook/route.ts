@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processWebhookEvent, storeWebhookEvent } from '@/config/actions';
 import crypto from 'crypto';
 
+/**
+ * Handle incoming LemonSqueezy webhook POST requests.
+ *
+ * Validates the webhook signature, parses the payload, persists the event, and dispatches it for processing.
+ *
+ * @param req - The incoming Next.js request containing the raw webhook body and headers
+ * @returns A JSON response: `{ success: true }` on successful processing, or `{ error: string }` on failure with an appropriate HTTP status code
+ */
 export async function POST(req: NextRequest) {
   try {
     // Get the raw body

@@ -55,7 +55,15 @@ export type EnhancedSubscriptionStatus = {
 };
 
 /**
- * Enhanced subscription hook that provides comprehensive billing state management
+ * Provides a consolidated view of the current user's subscription and billing state.
+ *
+ * @returns The computed EnhancedSubscriptionStatus containing:
+ * - subscription flags (`isSubscribed`, `isPro`, `isPremium`, state booleans, `canReactivate`)
+ * - plan details (`planName`, `planPrice`, `interval`, `intervalCount`)
+ * - billing dates and expiry info (`currentPeriodEnd`, `nextBillingDate`, `daysUntilExpiry`)
+ * - subscription records (`activeSubscription`, `allSubscriptions`, `subscriptionPlan`)
+ * - related URLs (`billingPortalUrl`, `updatePaymentMethodUrl`)
+ * - loading and error indicators (`isLoading`, `isError`)
  */
 export function useEnhancedSubscription(): EnhancedSubscriptionStatus {
   // Fetch current user data

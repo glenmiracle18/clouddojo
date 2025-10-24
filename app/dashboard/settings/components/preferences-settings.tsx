@@ -22,6 +22,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ThemeSelector } from "./theme-selector";
 
+/**
+ * Renders the PreferencesSettings UI for managing notification, language, and region preferences.
+ *
+ * Displays toggles for email, push, weekly report, and marketing notifications, selects for language and timezone, a theme selector, and a save button that shows a success toast.
+ *
+ * @returns The rendered preferences settings React element.
+ */
 export function PreferencesSettings() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);

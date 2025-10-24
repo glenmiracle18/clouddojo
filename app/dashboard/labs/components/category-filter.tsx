@@ -25,6 +25,15 @@ interface CategoryFilterProps {
   isLoading: boolean;
 }
 
+/**
+ * Render a category browsing UI with selectable category cards and an optional loading state.
+ *
+ * @param categories - Array of categories to display; each item includes counts and optional description.
+ * @param selectedCategory - Currently selected category name, or an empty string when no category is selected.
+ * @param onCategoryChange - Callback invoked with the new category name when a card is selected, or with an empty string to clear the selection.
+ * @param isLoading - When true, renders skeleton placeholders instead of category cards.
+ * @returns A React element containing the category filter UI, or `null` when `categories` is empty.
+ */
 export function CategoryFilter({
   categories,
   selectedCategory,

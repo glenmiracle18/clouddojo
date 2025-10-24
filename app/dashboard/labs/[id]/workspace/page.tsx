@@ -38,6 +38,13 @@ import { StepContent } from "../components/step-content";
 import { AchievementToast } from "../components/achievement-toast";
 import { DocumentationModal } from "../components/documentation-modal";
 
+/**
+ * Render the project workspace UI for viewing project details, navigating steps, submitting step responses, and tracking progress.
+ *
+ * The component fetches project and user-progress data, provides controls to change guidance mode and current step, tracks time spent and hints used for the active step, and submits step completion updates (including handling achievements and redirecting on project completion).
+ *
+ * @returns The project workspace page JSX element
+ */
 export default function ProjectWorkspacePage() {
   const { getToken } = useAuth();
   const params = useParams();
@@ -408,6 +415,13 @@ export default function ProjectWorkspacePage() {
   );
 }
 
+/**
+ * Render placeholder skeleton UI for the workspace page while project data is loading.
+ *
+ * Renders skeleton placeholders for the header, progress bar, left navigation/sidebar, and main content areas to indicate loading state.
+ *
+ * @returns A React element containing the workspace skeleton layout
+ */
 function WorkspaceSkeleton() {
   return (
     <div className="min-h-screen bg-background">

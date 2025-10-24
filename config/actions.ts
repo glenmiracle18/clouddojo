@@ -26,7 +26,11 @@ import { getSignedInUserOrThrow } from "@/lib/utils/database_utils";
 import prisma from "@/lib/prisma";
 
 /**
- * This action will create a checkout on Lemon Squeezy.
+ * Create a Lemon Squeezy checkout for a specific product variant and return its URL.
+ *
+ * @param variantId - The Lemon Squeezy variant ID to create a checkout for
+ * @param embed - When true, request an embeddable checkout experience
+ * @returns The checkout URL if available, otherwise `undefined`
  */
 export async function getCheckoutURL(variantId: number, embed = false) {
   configureLemonSqueezy();
@@ -64,8 +68,11 @@ export async function getCheckoutURL(variantId: number, embed = false) {
 }
 
 /**
- * This action will sync the product variants from Lemon Squeezy with the
- * Plans database model. It will only sync the 'subscription' variants.
+ * Synchronizes subscription product variants from Lemon Squeezy into the local Plans database.
+ *
+ * Upserts subscription variants as local subscription plans; non-subscription variants are ignored.
+ *
+ * @returns The array of subscription plans as stored in the database after synchronization
  */
 export async function syncPlans() {
   // must configure Lemon Squeezy before using it.
@@ -75,7 +82,11 @@ export async function syncPlans() {
   const productVariants: LsSubscriptionPlan[] =
     await prisma.lsSubscriptionPlan.findMany();
 
-  // Helper function to add a variant to the productVariants array and sync it with the database.
+  /**
+   * Upserts a subscription plan variant into the database and appends the resulting record to the in-memory productVariants array.
+   *
+   * @param variant - Subscription plan data to create or update; must include `variantId` to match existing records.
+   */
   async function _addVariant(
     variant: Omit<LsSubscriptionPlan, "id" | "createdAt" | "updatedAt">,
   ) {
@@ -161,6 +172,13 @@ export async function syncPlans() {
         continue;
       }
 
+      /**
+       * Convert a LemonSqueezy license length unit string into the corresponding VariantType.
+       *
+       * @param unit - The license length unit from LemonSqueezy (e.g., `"days"`, `"months"`, `"years"`).
+       * @returns The matching `VariantType`: `"DAYS"`, `"MONTHS"`, or `"YEARS"`.
+       * @throws Error if `unit` is not one of the expected values.
+       */
       function mapLicenseUnitToVariantType(unit: string): VariantType {
         switch (unit) {
           case "days":
@@ -198,7 +216,13 @@ export async function syncPlans() {
 }
 
 /**
- * Fetches all subscription plans from the database.
+ * Retrieve subscription plans from the database, ensuring they are synchronized with LemonSqueezy.
+ *
+ * Ensures local plan records are up-to-date by calling synchronization before querying. Each returned
+ * plan includes a guaranteed `features` array (defaults to `[]`) and a numeric `sort` key parsed from `price`.
+ *
+ * @returns An array of subscription plans augmented with `features` and a numeric `sort` value.
+ * @throws Error if synchronization or database retrieval fails.
  */
 export async function fetchPlans() {
   try {
@@ -249,7 +273,12 @@ export async function storeWebhookEvent(
 }
 
 /**
- * This action will process a webhook event in the database.
+ * Process a stored LemonSqueezy webhook event and persist resulting subscription, order, or license changes.
+ *
+ * Handles events contained in the provided stored webhook record; for subscription events this upserts the corresponding
+ * user subscription and records any processing error on the webhook event, then marks the webhook as processed.
+ *
+ * @param webhookEvent - The stored webhook event record to process (lsWebhookEvent)
  */
 export async function processWebhookEvent(webhookEvent: LsWebhookEvent) {
   configureLemonSqueezy();
@@ -364,7 +393,9 @@ export async function processWebhookEvent(webhookEvent: LsWebhookEvent) {
 }
 
 /**
- * This action will get the subscriptions for the current user.
+ * Retrieve subscriptions belonging to the currently signed-in user.
+ *
+ * @returns The list of `lsUserSubscription` records for the user, each including its related `subscriptionPlan`.
  */
 export async function getUserSubscriptions() {
   // Get the signed in user or throw an error.
@@ -385,7 +416,11 @@ export async function getUserSubscriptions() {
 }
 
 /**
- * This action will cancel a subscription on Lemon Squeezy.
+ * Cancel a Lemon Squeezy subscription and update the corresponding local record.
+ *
+ * @param id - LemonSqueezy subscription ID to cancel
+ * @returns The LemonSqueezy API response for the cancellation request
+ * @throws Error if the subscription is not found locally, if the Lemon Squeezy API returns an error, or if updating the database fails
  */
 export async function cancelSub(id: string) {
   configureLemonSqueezy();
@@ -430,7 +465,11 @@ export async function cancelSub(id: string) {
 }
 
 /**
- * This action will pause a subscription on Lemon Squeezy.
+ * Pause a user's LemonSqueezy subscription and persist the updated status locally.
+ *
+ * @param id - The LemonSqueezy subscription ID to pause
+ * @returns The LemonSqueezy API response for the updated (paused) subscription
+ * @throws Error if the subscription with the given ID is not found or if updating the database fails
  */
 export async function pauseUserSubscription(id: string) {
   configureLemonSqueezy();
@@ -476,7 +515,12 @@ export async function pauseUserSubscription(id: string) {
 }
 
 /**
- * This action will unpause a subscription on Lemon Squeezy.
+ * Resumes a paused LemonSqueezy subscription identified by its LemonSqueezy ID.
+ *
+ * @param id - The LemonSqueezy subscription ID to unpause
+ * @returns The updated subscription response returned by the LemonSqueezy API
+ * @throws If the subscription does not exist for the current user
+ * @throws If updating the local database record fails
  */
 export async function unpauseUserSubscription(id: string) {
   configureLemonSqueezy();
@@ -519,7 +563,14 @@ export async function unpauseUserSubscription(id: string) {
 }
 
 /**
- * This action will change the plan of a subscription on Lemon Squeezy.
+ * Change a user's subscription from one plan to another on Lemon Squeezy and persist the update locally.
+ *
+ * @param currentPlanId - The local plan ID currently associated with the user's subscription
+ * @param newPlanId - The local plan ID to switch the subscription to
+ * @returns The Lemon Squeezy API response for the updated subscription
+ * @throws Error if the current subscription is not found for the user
+ * @throws Error if the new plan ID does not exist in the database
+ * @throws Error if updating the local subscription record in the database fails
  */
 export async function changePlan(currentPlanId: string, newPlanId: string) {
   configureLemonSqueezy();
@@ -578,8 +629,11 @@ export async function changePlan(currentPlanId: string, newPlanId: string) {
 }
 
 /**
- * This action will get the subscription URLs (including `update_payment_method` for the given subscription ID.
+ * Retrieve the URLs associated with a LemonSqueezy subscription.
  *
+ * @param id - The LemonSqueezy subscription ID
+ * @returns The subscription's `urls` object (for example `update_payment_method` and billing portal URLs) or `undefined` if not present
+ * @throws Error when the LemonSqueezy API returns an error
  */
 export async function getSubscriptionURLs(id: string) {
   configureLemonSqueezy();

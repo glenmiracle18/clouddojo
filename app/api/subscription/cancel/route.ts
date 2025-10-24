@@ -8,6 +8,16 @@ const cancelRequestSchema = z.object({
   reason: z.string().optional(),
 });
 
+/**
+ * Handles POST requests to cancel a user's subscription.
+ *
+ * Validates authentication and request data, verifies the user owns the specified subscription
+ * and that it is cancellable, performs the cancellation, and returns a JSON response describing the result.
+ *
+ * @returns On success: an object `{ success: true, message, subscription: { id, status, endsAt }, reason }`.
+ *          On failure: an error object `{ error }` (possible HTTP statuses: `401` unauthorized, `404` not found/forbidden,
+ *          `400` invalid request or already cancelled/expired, `500` server error). 
+ */
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user

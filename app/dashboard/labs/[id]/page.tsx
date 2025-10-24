@@ -38,6 +38,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 
+/**
+ * Render the detailed project page with metadata, content, and contextual actions for starting, continuing, or reviewing a project.
+ *
+ * Shows a loading skeleton while fetching project data and distinct error screens for premium access (403) and not-found (404) cases with a generic fallback for other errors. When the project is loaded it displays the header (category, premium badge, thumbnail, title, description), optional walkthrough video, learning objectives, prerequisites, and technologies, plus a sidebar with project stats and an action area that lets the user choose a guidance mode and start the project or continue/review an in-progress or completed project. Starting a project triggers a mutation, displays success/error toasts, and navigates to the project workspace on success.
+ *
+ * @returns The page's React element tree.
+ */
 export default function ProjectDetailPage() {
   const { getToken } = useAuth();
   const params = useParams();
@@ -509,6 +516,13 @@ export default function ProjectDetailPage() {
   );
 }
 
+/**
+ * Renders a skeleton placeholder that matches the Project Detail page layout while project data is loading.
+ *
+ * Provides skeleton blocks for the header, hero/media area, content sections, and sidebar to indicate loading state.
+ *
+ * @returns A JSX element containing the Project Detail loading skeleton
+ */
 function ProjectDetailSkeleton() {
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
