@@ -21,6 +21,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+/**
+ * Modal that explains how user rankings are calculated through a four-step walkthrough.
+ *
+ * The component renders a Globe trigger button with a tooltip. Opening the modal resets the walkthrough
+ * to the first step. It displays a step title and description, visual step indicators, and actions to
+ * advance (Next), skip, or finish (Okay) the walkthrough.
+ *
+ * @returns A JSX element that renders the interactive ranking information dialog.
+ */
 export default function HowWeRank() {
   const [step, setStep] = useState(1);
 

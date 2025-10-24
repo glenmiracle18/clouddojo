@@ -40,6 +40,19 @@ interface StepContentProps {
   onHintUsed?: () => void;
 }
 
+/**
+ * Render a guidance-aware UI for a lab step including instructions, media resources, hints, expected output, and validation criteria.
+ *
+ * Renders a header with step metadata, a filtered instructions section (Markdown), optional media resources, and collapsible help panels whose visibility is driven by internal state. Instruction content is filtered according to `guidanceMode`:
+ * - `INDEPENDENT`: remove `[HINT]...[/HINT]` and `[DETAILED]...[/DETAILED]` blocks
+ * - `SOME_GUIDANCE`: remove `[DETAILED]...[/DETAILED]` blocks
+ * - `STEP_BY_STEP`: show all content
+ *
+ * @param step - The step data to render (title, instructions, mediaUrls, estimatedTime, expectedOutput, validationCriteria, stepType, etc.).
+ * @param guidanceMode - The active guidance mode that controls which instruction sections are shown (`INDEPENDENT`, `SOME_GUIDANCE`, or `STEP_BY_STEP`).
+ * @param onHintUsed - Optional callback invoked once when the user first opens the hints panel.
+ * @returns The rendered React element tree for the step content.
+ */
 export function StepContent({ step, guidanceMode, onHintUsed }: StepContentProps) {
   const [showHints, setShowHints] = useState(false);
   const [showValidation, setShowValidation] = useState(false);

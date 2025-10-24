@@ -33,6 +33,13 @@ const THEME_OPTIONS = [
   },
 ];
 
+/**
+ * Renders an appearance settings card that lets the user choose between system, light, and dark themes.
+ *
+ * The component renders a hydration-safe placeholder until mounted, then displays a three-option grid with live previews and labels. Selecting an option updates the application's theme preference and the UI highlights the active choice. A short note informs the user that the preference is persisted across sessions.
+ *
+ * @returns The React element for the appearance settings UI containing the placeholder (pre-mount) or the interactive theme selector (post-mount).
+ */
 export function ThemeSelector() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);

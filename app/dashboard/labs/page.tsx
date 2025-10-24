@@ -20,6 +20,14 @@ import { ProjectCard } from "./components/project-card";
 import { CategoryFilter } from "./components/category-filter";
 import { useAuth } from "@clerk/nextjs";
 
+/**
+ * Render the Hands-On Labs page with filter controls, category statistics, and a responsive projects grid.
+ *
+ * Renders search, category, difficulty, and type filters plus a premium-only toggle; fetches and displays
+ * projects and categories (using an auth token) and shows loading states, empty-state UI, and summary cards.
+ *
+ * @returns The page's JSX element containing the filters, stats, category filter area, and projects listing.
+ */
 export default function HandsOnLabsPage() {
   const { getToken } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");

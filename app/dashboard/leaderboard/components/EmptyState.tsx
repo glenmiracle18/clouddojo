@@ -3,7 +3,9 @@
 import { Trophy } from "lucide-react";
 
 /**
- * Empty state component displayed when there are no leaderboard entries
+ * Display an empty-state UI when the leaderboard has no entries.
+ *
+ * @returns The empty-state React element to render when the leaderboard is empty.
  */
 export function EmptyState() {
   return (

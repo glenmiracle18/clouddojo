@@ -8,6 +8,14 @@ interface RouteParams {
   }>;
 }
 
+/**
+ * Handle GET requests for a published project by id, returning project data and the requesting user's progress when available.
+ *
+ * Enforces that the requester is authenticated, returns 404 if the project is not found or unpublished, and denies access to premium projects when the user lacks an active or trial subscription.
+ *
+ * @param params - Route parameters (a promise-resolved object) that must include `id` — the project's identifier.
+ * @returns A JSON NextResponse containing the project's metadata, steps, computed fields (e.g., `totalSteps`, `completionCount`), and a `userProgress` snapshot (or `null` if none). On failure, returns a JSON NextResponse with an `error` message and an appropriate HTTP status (401, 403, 404, or 500).
+ */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await getAuth(req);

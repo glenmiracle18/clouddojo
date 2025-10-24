@@ -12,7 +12,17 @@ import {
 import useGetLeaderboardData from "@/app/(actions)/leaderboard";
 
 /**
- * Main leaderboard page component
+ * Render the leaderboard dashboard, including header, podium, table, and loading, error, and empty states.
+ *
+ * Renders a header that controls the time range, fetches leaderboard data for the selected range, and displays:
+ * - a full-screen loading state while data is loading,
+ * - a full-screen error state with retry behavior when an error occurs,
+ * - an empty state when no entries exist,
+ * - a podium for the top three users,
+ * - a table for remaining users, and
+ * - a special message when all users are on the podium.
+ *
+ * @returns A React element representing the complete leaderboard page.
  */
 export default function LeaderboardPage() {
   const [searchTerm, setSearchTerm] = useState("");

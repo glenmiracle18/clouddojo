@@ -13,6 +13,20 @@ interface RouteParams {
   }>;
 }
 
+/**
+ * Start a user's progress for the project identified by the route `id` or return existing progress.
+ *
+ * Validates the request body, ensures the project exists and is published, enforces premium access when required,
+ * prevents restarting a completed project, creates a new ProjectProgress when none exists, and awards a first-project
+ * achievement when appropriate.
+ *
+ * @param req - Incoming NextRequest containing the JSON body with optional `guidanceMode`.
+ * @param params - Route params promise resolving to an object with `id` (the project ID to start).
+ * @returns A NextResponse JSON payload. On success, includes `message` and a `progress` object with `id`, `status`,
+ * `currentStep`, `completedSteps`, `guidanceMode`, `startedAt`, `timeSpent`, and `progressPercentage`. On failure,
+ * returns an error message with an appropriate HTTP status: 401 (unauthorized), 404 (project not found),
+ * 403 (premium subscription required), 400 (validation error or project already completed), or 500 (server error).
+ */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await getAuth(req);

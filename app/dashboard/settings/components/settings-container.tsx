@@ -8,6 +8,11 @@ import { AccountSettings } from "./account-settings";
 import { SubscriptionSettings } from "./subscription-settings";
 import { PreferencesSettings } from "./preferences-settings";
 
+/**
+ * Render the dashboard settings container with tabbed views for Account, Subscription, and Preferences.
+ *
+ * @returns The settings container element containing a header and three tabbed panels: Account, Subscription, and Preferences.
+ */
 export function SettingsContainer() {
   const [activeTab, setActiveTab] = useState("account");
 

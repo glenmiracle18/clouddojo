@@ -2,6 +2,11 @@ import { PrismaClient, DifficultyLevel, ProjectType, ProjectStepType } from '@pr
 
 const prisma = new PrismaClient()
 
+/**
+ * Creates missing categories (AWS, Kubernetes, DevOps) and seeds the database with two sample projects and their nested steps.
+ *
+ * @returns An object containing `project1` and `project2`, the created project records including their generated IDs and nested step records.
+ */
 async function seedProjects() {
   console.log('🌱 Seeding hands-on labs projects...')
 
@@ -511,6 +516,13 @@ Verify your cluster is running and kubectl can connect to it.`,
   return { project1, project2 }
 }
 
+/**
+ * Orchestrates the project seeding process and ensures the Prisma client is disconnected.
+ *
+ * Invokes seedProjects, logs and rethrows any error encountered, and always disconnects the Prisma client.
+ *
+ * @throws The error encountered during seeding; it is rethrown to the caller after being logged.
+ */
 async function main() {
   try {
     await seedProjects()

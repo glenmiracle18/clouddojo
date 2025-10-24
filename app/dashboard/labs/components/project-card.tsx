@@ -52,6 +52,12 @@ interface ProjectCardProps {
   project: Project;
 }
 
+/**
+ * Renders a project card for the labs dashboard, including thumbnail, badges, stats, progress (when in-progress), and an action button.
+ *
+ * @param project - The project data to display in the card.
+ * @returns The rendered project card element.
+ */
 export function ProjectCard({ project }: ProjectCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {

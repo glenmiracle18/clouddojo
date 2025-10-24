@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 
+/**
+ * Return categories with per-category published project counts and the authenticated user's progress breakdown.
+ *
+ * @param req - The incoming NextRequest (must be authenticated via Clerk).
+ * @returns A JSON response:
+ * - Success: `{ categories: Array<{ id: string; name: string; description: string | null; projectCount: number; userStats: { completed: number; inProgress: number; notStarted: number } }> }`.
+ * - Unauthorized: `{ error: 'Unauthorized' }` with status 401.
+ * - Failure: `{ error: 'Failed to fetch categories' }` with status 500.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await getAuth(req);

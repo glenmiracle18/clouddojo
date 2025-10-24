@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   description: "Manage your account settings, subscription, and preferences.",
 };
 
+/**
+ * Renders the account settings page.
+ *
+ * Displays the SettingsContainer component which provides controls for account settings, subscription, and preferences.
+ *
+ * @returns The React element representing the settings page.
+ */
 export default function SettingsPage() {
   return <SettingsContainer />;
 }

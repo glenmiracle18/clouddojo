@@ -36,14 +36,16 @@ export type SubscriptionStatus = {
 };
 
 /**
- * Custom hook to check user subscription status
+ * Provides the current user's subscription flags and related metadata.
  *
- * @returns Object containing subscription status and loading state
- * @example
- * const { isPro, isPremium, isSubscribed, planName, isLoading } = useSubscription();
+ * Returns subscription flags, plan details, and query state for the current user.
  *
- * if (isLoading) return <LoadingSpinner />;
- * return isPro ? <ProFeature /> : <UpgradePrompt />;
+ * @returns The `SubscriptionStatus` object containing:
+ * - `isPro`, `isPremium`, `isSubscribed`, `isCancelled`, `isPaused` — boolean flags describing subscription state
+ * - `planName` — plan name string or `null`
+ * - `subscriptionStatus` — raw subscription status string (e.g., `"active"`, `"on_trial"`, `"cancelled"`) or `null`
+ * - `endsAt`, `renewsAt` — `Date` objects for end/renewal times or `null`
+ * - `isLoading`, `isError` — query state booleans for the underlying user fetch
  */
 export function useSubscription(): SubscriptionStatus {
   // Fetch user data with subscription info

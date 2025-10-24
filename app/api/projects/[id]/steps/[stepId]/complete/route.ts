@@ -16,6 +16,17 @@ interface RouteParams {
   }>;
 }
 
+/**
+ * Records a user's completion of a project step, updates their progress, and awards any earned achievements.
+ *
+ * @param req - Incoming request whose JSON body must include `response` (string, at least 10 chars), `timeSpent` (number, >= 0), and `hintsUsed` (number, >= 0).
+ * @param params - Route parameters object providing `id` (projectId) and `stepId`.
+ * @returns A JSON object containing:
+ *  - `message`: confirmation string,
+ *  - `stepResponse`: the created or updated step response (`id`, `response`, `completedAt`, `timeSpent`, `hintsUsed`, `validationPassed`),
+ *  - `progress`: the updated project progress (`id`, `status`, `currentStep`, `completedSteps`, `progressPercentage`, `timeSpent`, `isComplete`, `completedAt`),
+ *  - `achievements`: array of any newly created achievement records.
+ */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await getAuth(req);

@@ -5,6 +5,22 @@ import prisma from "@/lib/prisma";
 import * as seline from "@seline-analytics/web";
 import { sendWelcomeEmail } from "@/lib/emails/send-email";
 
+/**
+ * Handles incoming Svix webhooks for Clerk user events, verifies the signature, and synchronizes user records.
+ *
+ * Verifies the Svix headers and payload, processes "user.created" and "user.updated" events by creating or
+ * updating a user in the database, attempts to send a welcome email for newly created users, and sets the
+ * Seline user profile. Other event types are acknowledged without additional processing.
+ *
+ * @param req - Incoming HTTP request containing the webhook JSON body and Svix signature headers
+ * @returns A Response indicating the result:
+ * - `200` with "User synced to database" when a user-created/updated event was processed successfully
+ * - `200` with "Webhook received" for non-user events
+ * - `400` with "Error: Missing svix headers" when required Svix headers are absent
+ * - `400` with "Error verifying webhook" when signature verification fails
+ * - `400` with "Error: Missing user data" when required user fields are missing from the payload
+ * - `500` with "Error syncing user to database" when a database or processing error occurs
+ */
 export async function POST(req: Request) {
   // Get the headers
   const headerPayload = await headers();

@@ -22,6 +22,13 @@ import * as FancyButton from "@/components/ui/fancy-button";
 import ModeToggle from "./mode-toggle";
 import MobileNavigation from "./mobile-nav";
 
+/**
+ * Renders the top navigation bar, adapting layout and controls for desktop and mobile and showing actions based on authentication state.
+ *
+ * Renders a logo, primary navigation links, a theme mode toggle, and authentication-specific action buttons; on mobile it shows a menu toggle that opens a mobile navigation panel.
+ *
+ * @returns A JSX element rendering the responsive, authentication-aware navigation bar.
+ */
 export default function Tabnavbar() {
   const { isSignedIn } = useUser();
   const isMobile = useIsMobile();

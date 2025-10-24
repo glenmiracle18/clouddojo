@@ -9,7 +9,10 @@ interface TimeRangeSelectorProps {
 }
 
 /**
- * Component for selecting the time range for leaderboard data
+ * Renders a compact button group to choose the leaderboard time range.
+ *
+ * @param timeRange - The currently selected time range option.
+ * @param onTimeRangeChange - Handler invoked with the new `TimeRangeOption` when a button is clicked.
  */
 export function TimeRangeSelector({
   timeRange,

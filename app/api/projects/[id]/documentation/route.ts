@@ -9,6 +9,26 @@ interface RouteParams {
   }>;
 }
 
+/**
+ * Generate and return project documentation for the authenticated user's project progress.
+ *
+ * Authenticates the request, retrieves the user's project progress by route `id`, generates
+ * a Markdown documentation string from that progress, persists the generated documentation,
+ * and responds with the documentation plus metadata.
+ *
+ * @param params - Route parameters promise resolving to an object with `id` set to the project id
+ * @returns A JSON HTTP response containing:
+ *   - `documentation`: the generated documentation string
+ *   - `generatedAt`: timestamp when documentation was generated
+ *   - `projectTitle`: project title
+ *   - `userName`: user's full name
+ *   - `completedAt`: project completion timestamp or null
+ *   - `timeSpent`: total time spent (minutes)
+ *   - `achievements`: number of achievements earned
+ *
+ * The route returns 401 if the request is unauthorized, 404 if no progress is found for the project,
+ * and 500 on unexpected failure.
+ */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await getAuth(req);
@@ -120,6 +140,23 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * Produce a Markdown-formatted project documentation string derived from a user's project progress.
+ *
+ * Generates a human-readable documentation document that summarizes the project overview, technologies used,
+ * learning reflections, implementation steps with per-step details, achievements, statistics, and contact placeholders.
+ *
+ * @param progress - An object representing the user's progress for a project. Expected properties:
+ *   - user: { firstName: string, lastName: string, email: string }
+ *   - project: { title: string, description: string, category: { name: string }, keyTechnologies: string[], difficulty: string }
+ *   - stepResponses: Array of { step: { stepNumber: number, title: string, description?: string, stepType: string }, response: string, timeSpent?: number, hintsUsed?: number }
+ *   - achievements: Array of { title: string, description?: string, earnedAt: string|Date }
+ *   - startedAt: string|Date
+ *   - completedAt?: string|Date
+ *   - timeSpent: number (total minutes)
+ *   - status?: string
+ *   - completedSteps?: any[]
+ * @returns The assembled documentation as a Markdown string suitable for display or export.
 function generateProjectDocumentation(progress: any): string {
   const {
     user,

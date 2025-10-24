@@ -6,6 +6,11 @@ const API_BASE_URL = 'http://localhost:3000/api'
 // Mock auth for testing (replace with actual auth token in real tests)
 const TEST_USER_ID = 'test-user-id'
 
+/**
+ * Runs a sequence of sanity checks against the database and expected API endpoint patterns, logging results and suggestions.
+ *
+ * Performs checks for sample projects, categories, API endpoint structure, database relationships, schema field presence, authentication patterns, and premium content. Ensures the Prisma client is disconnected when finished.
+ */
 async function testAPIEndpoints() {
   console.log('🧪 Testing Hands-On Labs API Endpoints...\n')
 
@@ -138,6 +143,13 @@ async function testAPIEndpoints() {
   }
 }
 
+/**
+ * Prints example API response shapes to the console for documentation and manual validation.
+ *
+ * Outputs representative responses for key endpoints (including `GET /api/projects` and
+ * `POST /api/projects/[id]/steps/[stepId]/complete`) to illustrate expected fields and
+ * response patterns used by the API.
+ */
 async function validateAPIResponse() {
   console.log('\n🔍 API Response Structure Validation:\n')
   

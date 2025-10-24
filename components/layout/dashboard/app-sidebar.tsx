@@ -199,7 +199,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 /**
- * Individual navigation item component
+ * Render a single navigation entry for the sidebar.
+ *
+ * Renders a disabled, muted menu button when the item is marked `comingSoon`; otherwise renders a linked menu button that applies active styling when `isActive` is true and shows a "NEW" badge when `item.isNew` is set.
+ *
+ * @param item - Navigation item data (title, url, icon, and optional `comingSoon`/`isNew` flags)
+ * @param isActive - Whether this item's route matches the current pathname; controls active visual state
+ * @returns A SidebarMenuItem element representing the navigation entry
  */
 function NavItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
   if (item.comingSoon) {

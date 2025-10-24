@@ -22,6 +22,15 @@ import {
 import { useClerk } from "@clerk/nextjs";
 import { format } from "date-fns";
 
+/**
+ * Render the account settings UI showing the current user's profile and account management control.
+ *
+ * Displays a loading card when no user is available. When a user is present, shows avatar (if available),
+ * full name, primary email as a mailto link, formatted join date (if available), and a "Manage Account" button
+ * that opens Clerk's user profile manager.
+ *
+ * @returns A React element containing either the loading state or the profile information card with account management controls.
+ */
 export function AccountSettings() {
   const { user } = useUser();
   const { openUserProfile } = useClerk();
