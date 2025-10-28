@@ -6,7 +6,11 @@ import { TimeRangeSelector } from "./TimeRangeSelector";
 import HowWeRank from "./how-we-rank.modal.";
 
 /**
- * LeaderboardHeader component displays the title and info dialog
+ * Header for the leaderboard that provides a time-range selector and access to ranking information.
+ *
+ * @param handleTimeRangeChange - Callback invoked with the selected time range when the user changes it
+ * @param timeRange - Currently selected time range shown by the selector
+ * @returns The header element containing a TimeRangeSelector and the HowWeRank control
  */
 export function LeaderboardHeader({
   handleTimeRangeChange,

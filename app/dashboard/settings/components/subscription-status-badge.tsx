@@ -17,6 +17,18 @@ interface SubscriptionStatusBadgeProps {
   className?: string;
 }
 
+/**
+ * Render a status badge for a subscription state.
+ *
+ * The badge displays an icon, a short status label, and state-specific styling; when `state`
+ * is `"cancelled_active"` and `daysUntilExpiry` is a positive number, the label includes the
+ * remaining days (e.g., "Cancelled | Ends in 3 days").
+ *
+ * @param state - The subscription state that determines the badge's icon, text, and styling.
+ * @param daysUntilExpiry - Optional number of days until the subscription ends; used to
+ *   augment the label for the `"cancelled_active"` state when greater than zero.
+ * @returns A Badge JSX element showing an icon and status text corresponding to `state`.
+ */
 export function SubscriptionStatusBadge({
   state,
   daysUntilExpiry,

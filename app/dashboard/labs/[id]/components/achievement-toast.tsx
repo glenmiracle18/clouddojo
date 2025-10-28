@@ -21,6 +21,15 @@ interface AchievementToastProps {
   onClose: () => void;
 }
 
+/**
+ * Render an animated, dismissible achievement toast that notifies the user of an earned achievement.
+ *
+ * The toast animates into view on mount, can be dismissed manually, and auto-closes after a short timeout.
+ *
+ * @param achievement - The achievement object to display (title, description, type, iconUrl, etc.).
+ * @param onClose - Callback invoked once the toast has finished its exit animation and is removed.
+ * @returns The toast element, or `null` if the toast has been removed from the DOM.
+ */
 export function AchievementToast({ achievement, onClose }: AchievementToastProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRemove, setShouldRemove] = useState(false);

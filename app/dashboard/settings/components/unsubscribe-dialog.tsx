@@ -38,6 +38,21 @@ const CANCELLATION_REASONS = [
   { value: "other", label: "Other reason" },
 ];
 
+/**
+ * Render a multi-step modal that guides the user through cancelling a subscription.
+ *
+ * The dialog presents a confirmation step with details about cancellation effects, an optional
+ * feedback step to collect a cancellation reason (including a freeform "Other" text field), and
+ * a final success step after the cancellation completes. While a cancellation request is in
+ * progress the dialog prevents premature closing and shows loading states; on success the
+ * component advances to the final state and invokes `onSuccess`.
+ *
+ * @param isOpen - Controls whether the dialog is visible
+ * @param onOpenChange - Callback invoked when the dialog requests to change its open state
+ * @param subscription - Subscription data used to populate plan, price, next billing date, and status
+ * @param onSuccess - Callback invoked after a successful cancellation
+ * @returns The UnsubscribeDialog React element
+ */
 export function UnsubscribeDialog({ 
   isOpen, 
   onOpenChange, 

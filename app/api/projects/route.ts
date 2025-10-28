@@ -13,6 +13,12 @@ const projectsQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(50).default(20),
 });
 
+/**
+ * Handle GET requests to list published projects with filtering, pagination, and per-user progress.
+ *
+ * @param req - The incoming NextRequest used for authentication and query parameters.
+ * @returns A JSON HTTP response. On success (200) the body contains `projects` (array of projects with category, counts, and optional `userProgress`) and `pagination` (page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage). Returns 401 when the request is unauthorized, 400 with validation `details` for invalid query parameters, and 500 for other failures.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await getAuth(req);

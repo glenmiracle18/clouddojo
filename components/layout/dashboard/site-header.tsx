@@ -25,6 +25,13 @@ import { useFeedbackStore } from "@/store/use-feedback-store";
 import { useCommandMenuStore } from "@/store/use-command-menu-store";
 import ThemeSwitcher from "@/components/theme-switcher";
 
+/**
+ * Renders the application top header with a sidebar trigger, breadcrumb navigation, search/command trigger, feedback dialog, and user account controls.
+ *
+ * Breadcrumbs are derived from the current pathname; path segments that are long or match a 24-hex pattern (likely IDs) are omitted, and the dashboard root renders as a single "Dashboard" item.
+ *
+ * @returns The header element containing navigation, search/command access, feedback, and user controls.
+ */
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
   const user = useUser();

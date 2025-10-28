@@ -21,6 +21,13 @@ import { SubscriptionStatusBadge } from "./subscription-status-badge";
 import { BillingHistory } from "./billing-history";
 import Link from "next/link";
 
+/**
+ * Render the subscription settings panel with current plan details, status alerts, and management actions.
+ *
+ * Displays loading and error states; when a subscription exists it shows plan name, price, next billing or access end date, and conditional alerts for cancelled-but-active or past-due subscriptions. Provides actions to update payment method, open the billing portal, or navigate to pricing when no active subscription exists.
+ *
+ * @returns The JSX element for the subscription settings UI.
+ */
 export function SubscriptionSettings() {
   const handleManageBilling = (url: string) => {
     window.open(url, "_blank");

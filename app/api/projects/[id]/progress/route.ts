@@ -15,6 +15,17 @@ interface RouteParams {
   }>;
 }
 
+/**
+ * Retrieve the authenticated user's progress for a specific project.
+ *
+ * @returns A JSON response containing the project's progress summary:
+ * - `id`, `projectId`, `projectTitle`, `status`, `currentStep`, `completedSteps`, `guidanceMode`
+ * - `startedAt`, `completedAt`, `timeSpent`, `totalSteps`, `progressPercentage`
+ * - `stepResponses` (each with `stepNumber`, `stepTitle`, `response`, `completedAt`, `timeSpent`, `hintsUsed`, `validationPassed`)
+ * - `achievements`
+ *
+ * On error returns a JSON error object with an `error` message and an appropriate HTTP status code (401, 404, or 500).
+ */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await getAuth(req);
@@ -117,6 +128,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * Update the authenticated user's progress for the specified project.
+ *
+ * @param params - Route parameters; `params.id` is the project ID to update progress for.
+ * @returns A `NextResponse` containing a JSON payload. On success the payload includes a message and a `progress` object with the updated progress summary (id, status, currentStep, completedSteps, guidanceMode, timeSpent, progressPercentage, updatedAt). On failure the response contains an `error` message (and `details` for validation failures) with an appropriate HTTP status (401, 400, 404, or 500).
+ */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await getAuth(req);

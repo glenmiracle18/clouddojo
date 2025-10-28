@@ -25,6 +25,18 @@ interface StepNavigationProps {
   onStepSelect: (stepNumber: number) => void;
 }
 
+/**
+ * Render a card containing a scrollable, selectable list of project steps with status and metadata.
+ *
+ * Renders each step with an icon representing its state (completed, current, accessible, or locked),
+ * an optional "Optional" badge, a step type badge, estimated time, and a visual progress indicator.
+ *
+ * @param steps - Array of steps to display (id, stepNumber, title, optional description, stepType, estimatedTime, isOptional).
+ * @param currentStep - The active step number used to determine current and accessible states.
+ * @param completedSteps - Array of completed step numbers used to mark steps as completed.
+ * @param onStepSelect - Callback invoked with a step number when an accessible step is selected.
+ * @returns A Card element that presents the steps in a scrollable list with selection and status indicators.
+ */
 export function StepNavigation({
   steps,
   currentStep,

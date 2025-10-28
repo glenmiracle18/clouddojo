@@ -8,7 +8,10 @@ interface ThemePreviewProps {
 }
 
 /**
- * Light Theme Preview Component
+ * Renders a light-themed mock preview of an interface with a top bar, sidebar, and content lines.
+ *
+ * @param className - Additional CSS class names applied to the root container
+ * @returns The rendered light-themed preview element
  */
 export function LightThemePreview({ className = "" }: ThemePreviewProps) {
   return (
@@ -35,7 +38,13 @@ export function LightThemePreview({ className = "" }: ThemePreviewProps) {
 }
 
 /**
- * Dark Theme Preview Component
+ * Renders a dark-themed visual preview of a simple dashboard layout.
+ *
+ * The preview contains a top gradient bar, a sidebar block, a main content column
+ * with three horizontal gradient lines, and a short emerald accent bar.
+ *
+ * @param className - Optional additional CSS class names to apply to the root container
+ * @returns A JSX element containing the dark-themed preview
  */
 export function DarkThemePreview({ className = "" }: ThemePreviewProps) {
   return (
@@ -62,8 +71,10 @@ export function DarkThemePreview({ className = "" }: ThemePreviewProps) {
 }
 
 /**
- * System Theme Preview Component
- * Shows a split view: half light, half dark
+ * Renders a split theme preview with a light panel on the left and a dark panel on the right.
+ *
+ * @param className - Optional additional CSS classes applied to the root container
+ * @returns A JSX element displaying side-by-side light and dark theme previews
  */
 export function SystemThemePreview({ className = "" }: ThemePreviewProps) {
   return (
@@ -122,6 +133,13 @@ interface ThemePreviewWrapperProps {
   className?: string;
 }
 
+/**
+ * Render a visual preview matching the provided theme selection.
+ *
+ * @param theme - The theme to preview: `"light"`, `"dark"`, or `"system"`.
+ * @param className - Additional CSS class names to apply to the preview container.
+ * @returns A JSX element rendering the preview for the selected theme.
+ */
 export function ThemePreviewWrapper({
   theme,
   className = "",
